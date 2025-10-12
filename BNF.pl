@@ -1,82 +1,117 @@
-% BNF.pl - Gramatica Libre de Contexto e Interface de Usuario
-% Este archivo implementa la gramatica DCG y la interfaz del usuario
+% BNF.pl - Gramatica Libre de Contexto (DCG) e Interfaz de Usuario
+% Este archivo define la gramatica DCG y proporciona la interfaz interactiva
 
 :- consult('Logic.pl').
 
-% ========== GRAMATICA LIBRE DE CONTEXTO (DCG) ==========
-% Definicion de la gramatica para analisis sintactico
+% ===============================================
+% GRAMATICA LIBRE DE CONTEXTO (DCG)
+% ===============================================
+% Define las reglas gramaticales en formato DCG
+% Estas reglas se usan para el analisis sintactico
 
-% Oracion completa
-oracion --> sintagma_nominal, sintagma_verbal.
-oracion --> sintagma_verbal.
-oracion --> interjeccion.
+% Oracion: puede ser SN + SV, solo SV, o una interjeccion
+oracion(oracion(SN, SV)) --> sintagma_nominal(SN), sintagma_verbal(SV).
+oracion(oracion(vacio, SV)) --> sintagma_verbal(SV).
+oracion(interjeccion(hola)) --> [hola].
+oracion(interjeccion(hello)) --> [hello].
 
-% Sintagma Nominal
-sintagma_nominal --> determinante, nombre.
-sintagma_nominal --> determinante, adjetivo, nombre.
-sintagma_nominal --> nombre.
-sintagma_nominal --> pronombre.
+% Sintagma Nominal: determinante + nombre, con o sin adjetivo, o solo pronombre
+sintagma_nominal(sn([det(Det), nom(Nom)])) --> 
+    determinante(Det), nombre(Nom).
 
-% Sintagma Verbal
-sintagma_verbal --> verbo.
-sintagma_verbal --> verbo, sintagma_nominal.
-sintagma_verbal --> verbo, sintagma_preposicional.
-sintagma_verbal --> verbo, adjetivo.
-sintagma_verbal --> verbo, adverbio.
-sintagma_verbal --> verbo, sintagma_nominal, sintagma_preposicional.
+sintagma_nominal(sn([det(Det), adj(Adj), nom(Nom)])) --> 
+    determinante(Det), adjetivo(Adj), nombre(Nom).
 
-% Sintagma Preposicional
-sintagma_preposicional --> preposicion, sintagma_nominal.
-sintagma_preposicional --> preposicion, nombre.
+sintagma_nominal(sn([nom(Nom)])) --> 
+    nombre(Nom).
 
-% Componentes lexicos
-determinante --> [X], {palabra(X, _, articulo)}.
-determinante --> [X], {palabra(_, X, articulo)}.
+sintagma_nominal(sn([pron(Pron)])) --> 
+    pronombre(Pron).
 
-nombre --> [X], {palabra(X, _, sustantivo)}.
-nombre --> [X], {palabra(_, X, sustantivo)}.
+% Sintagma Verbal: verbo con diferentes complementos
+sintagma_verbal(sv([v(V)])) --> 
+    verbo(V).
 
-verbo --> [X], {palabra(X, _, verbo)}.
-verbo --> [X], {palabra(_, X, verbo)}.
+sintagma_verbal(sv([v(V), SN])) --> 
+    verbo(V), sintagma_nominal(SN).
 
-adjetivo --> [X], {palabra(X, _, adjetivo)}.
-adjetivo --> [X], {palabra(_, X, adjetivo)}.
+sintagma_verbal(sv([v(V), SP])) --> 
+    verbo(V), sintagma_preposicional(SP).
 
-adverbio --> [X], {palabra(X, _, adverbio)}.
-adverbio --> [X], {palabra(_, X, adverbio)}.
+sintagma_verbal(sv([v(V), adj(Adj)])) --> 
+    verbo(V), adjetivo(Adj).
 
-pronombre --> [X], {palabra(X, _, pronombre)}.
-pronombre --> [X], {palabra(_, X, pronombre)}.
+sintagma_verbal(sv([v(V), adv(Adv)])) --> 
+    verbo(V), adverbio(Adv).
 
-preposicion --> [X], {palabra(X, _, preposicion)}.
-preposicion --> [X], {palabra(_, X, preposicion)}.
+% Sintagma Preposicional: preposicion + sintagma nominal
+sintagma_preposicional(sp([prep(Prep), SN])) --> 
+    preposicion(Prep), sintagma_nominal(SN).
 
-conjuncion --> [X], {palabra(X, _, conjuncion)}.
-conjuncion --> [X], {palabra(_, X, conjuncion)}.
+sintagma_preposicional(sp([prep(Prep), nom(Nom)])) --> 
+    preposicion(Prep), nombre(Nom).
 
-interjeccion --> [X], {palabra(X, _, sustantivo), X = hola}.
-interjeccion --> [X], {palabra(_, X, sustantivo), X = hello}.
+% ===============================================
+% COMPONENTES LEXICOS (Terminales)
+% ===============================================
+% Definen las categorias gramaticales basicas
 
-% ========== ANALISIS Y TRADUCCION CON DCG ==========
-% Analiza si una lista de palabras es una oracion valida
+% Determinante: articulos definidos e indefinidos
+determinante(X) --> [X], {palabra(X, _, articulo)}.
+determinante(X) --> [X], {palabra(_, X, articulo)}.
+
+% Nombre: sustantivos
+nombre(X) --> [X], {palabra(X, _, sustantivo)}.
+nombre(X) --> [X], {palabra(_, X, sustantivo)}.
+
+% Verbo: verbos en tiempo presente
+verbo(X) --> [X], {palabra(X, _, verbo)}.
+verbo(X) --> [X], {palabra(_, X, verbo)}.
+
+% Adjetivo: calificativos
+adjetivo(X) --> [X], {palabra(X, _, adjetivo)}.
+adjetivo(X) --> [X], {palabra(_, X, adjetivo)}.
+
+% Adverbio: modificadores de verbo
+adverbio(X) --> [X], {palabra(X, _, adverbio)}.
+adverbio(X) --> [X], {palabra(_, X, adverbio)}.
+
+% Pronombre: yo, tu, el, ella, etc.
+pronombre(X) --> [X], {palabra(X, _, pronombre)}.
+pronombre(X) --> [X], {palabra(_, X, pronombre)}.
+
+% Preposicion: en, de, con, etc.
+preposicion(X) --> [X], {palabra(X, _, preposicion)}.
+preposicion(X) --> [X], {palabra(_, X, preposicion)}.
+
+% ===============================================
+% PREDICADOS DE VALIDACION DCG
+% ===============================================
+
+% Valida si una lista de palabras es una oracion valida segun la gramatica
 es_oracion_valida(Lista) :-
-    oracion(Lista, []).
+    oracion(_, Lista, []).
 
-% Traduce usando analisis DCG
-traducir_con_dcg(Entrada, Salida) :-
-    oracion_a_lista(Entrada, ListaEntrada),
-    (   es_oracion_valida(ListaEntrada)
-    ->  traducir_auto(Entrada, Salida)
-    ;   traducir_auto(Entrada, Salida)  % Traduce aunque no sea valida
-    ).
+% Valida y retorna la estructura
+validar_y_parsear(Lista, Estructura) :-
+    oracion(Estructura, Lista, []).
 
-% ========== INTERFACE DE USUARIO ==========
-% Predicado principal para TransLogEI (Espanol a Ingles)
+% ===============================================
+% INTERFAZ DE USUARIO - TransLogEI
+% ===============================================
+% Traductor Espanol -> Ingles
+
 translog_ei :-
+    writeln(''),
     writeln('==========================================='),
     writeln('   TransLogEI - Traductor Espanol-Ingles   '),
     writeln('==========================================='),
-    writeln('Escribe oraciones en espanol (escribe "salir" para terminar)'),
+    writeln(''),
+    writeln('Sistema Experto de Traduccion'),
+    writeln('Usando analisis sintactico con DCG'),
+    writeln(''),
+    writeln('Escribe oraciones en espanol.'),
+    writeln('(escribe "salir" para terminar)'),
     writeln(''),
     ciclo_traduccion_ei.
 
@@ -84,9 +119,7 @@ translog_ei :-
 ciclo_traduccion_ei :-
     write('Usuario: '),
     read_line_to_string(user_input, Entrada),
-    (   Entrada = "salir"
-    ->  writeln('Hasta luego!')
-    ;   Entrada = "exit"
+    (   (Entrada = "salir" ; Entrada = "exit")
     ->  writeln('Hasta luego!')
     ;   (   atom_string(EntradaAtom, Entrada),
             traducir_esp_a_ing(EntradaAtom, Salida),
@@ -95,12 +128,22 @@ ciclo_traduccion_ei :-
         )
     ).
 
-% Predicado principal para TransLogIE (Ingles a Espanol)
+% ===============================================
+% INTERFAZ DE USUARIO - TransLogIE
+% ===============================================
+% Traductor Ingles -> Espanol
+
 translog_ie :-
+    writeln(''),
     writeln('==========================================='),
     writeln('   TransLogIE - Traductor Ingles-Espanol   '),
     writeln('==========================================='),
-    writeln('Write sentences in English (type "exit" to quit)'),
+    writeln(''),
+    writeln('Expert System for Translation'),
+    writeln('Using syntactic analysis with DCG'),
+    writeln(''),
+    writeln('Write sentences in English.'),
+    writeln('(type "exit" to quit)'),
     writeln(''),
     ciclo_traduccion_ie.
 
@@ -108,9 +151,7 @@ translog_ie :-
 ciclo_traduccion_ie :-
     write('User: '),
     read_line_to_string(user_input, Entrada),
-    (   Entrada = "exit"
-    ->  writeln('Goodbye!')
-    ;   Entrada = "salir"
+    (   (Entrada = "exit" ; Entrada = "salir")
     ->  writeln('Goodbye!')
     ;   (   atom_string(EntradaAtom, Entrada),
             traducir_ing_a_esp(EntradaAtom, Salida),
@@ -119,16 +160,27 @@ ciclo_traduccion_ie :-
         )
     ).
 
-% Predicado principal para TransLog (Auto-detecta idioma)
+% ===============================================
+% INTERFAZ DE USUARIO - TransLog
+% ===============================================
+% Traductor con auto-deteccion de idioma
+
 translog :-
+    writeln(''),
     writeln('==========================================='),
     writeln('        TransLog - Traductor Bilingue      '),
     writeln('==========================================='),
-    writeln('Escribe en espanol o ingles (escribe "salir"/"exit" para terminar)'),
+    writeln(''),
+    writeln('Sistema Experto de Traduccion Bilingue'),
+    writeln('Deteccion automatica de idioma'),
+    writeln('Analisis sintactico con DCG'),
+    writeln(''),
+    writeln('Escribe en espanol o ingles.'),
+    writeln('(escribe "salir"/"exit" para terminar)'),
     writeln(''),
     ciclo_traduccion_auto.
 
-% Ciclo de traduccion automatica
+% Ciclo de traduccion con auto-deteccion
 ciclo_traduccion_auto :-
     write('Usuario/User: '),
     read_line_to_string(user_input, Entrada),
@@ -147,73 +199,207 @@ ciclo_traduccion_auto :-
         )
     ).
 
-% ========== PREDICADOS DE PRUEBA ==========
-% Prueba la traduccion de una oracion
+% ===============================================
+% PREDICADOS DE PRUEBA Y VALIDACION
+% ===============================================
+
+% Prueba traduccion Espanol -> Ingles con analisis
 probar_traduccion_ei(Oracion) :-
-    write('Entrada (ES): '), writeln(Oracion),
+    writeln(''),
+    writeln('=== PRUEBA DE TRADUCCION ES->EN ==='),
+    format('Entrada (ES): ~w~n', [Oracion]),
+    
+    % Mostrar analisis sintactico
+    oracion_a_lista(Oracion, Lista),
+    write('Tokenizacion: '), writeln(Lista),
+    
+    (analizar_oracion_dcg(Lista, Estructura) ->
+        write('Estructura DCG: '), writeln(Estructura),
+        writeln('✓ Oracion valida segun gramatica')
+    ;
+        writeln('✗ Oracion no valida, usando traduccion simple')
+    ),
+    
+    % Traducir
     traducir_esp_a_ing(Oracion, Traduccion),
-    write('Salida (EN): '), writeln(Traduccion).
+    format('Salida (EN): ~w~n', [Traduccion]),
+    writeln('').
 
+% Prueba traduccion Ingles -> Espanol con analisis
 probar_traduccion_ie(Oracion) :-
-    write('Entrada (EN): '), writeln(Oracion),
+    writeln(''),
+    writeln('=== PRUEBA DE TRADUCCION EN->ES ==='),
+    format('Entrada (EN): ~w~n', [Oracion]),
+    
+    % Mostrar analisis sintactico
+    oracion_a_lista(Oracion, Lista),
+    write('Tokenizacion: '), writeln(Lista),
+    
+    (analizar_oracion_dcg(Lista, Estructura) ->
+        write('Estructura DCG: '), writeln(Estructura),
+        writeln('Oracion valida segun gramatica')
+    ;
+        writeln('Oracion no valida, usando traduccion simple')
+    ),
+    
+    % Traducir
     traducir_ing_a_esp(Oracion, Traduccion),
-    write('Salida (ES): '), writeln(Traduccion).
+    format('Salida (ES): ~w~n', [Traduccion]),
+    writeln('').
 
-% ========== EJEMPLOS DE USO ==========
-% Para ejecutar el sistema:
-% ?- translog_ei.     % Para español a inglés
-% ?- translog_ie.     % Para inglés a español
-% ?- translog.        % Para auto-detección
+% ===============================================
+% ANALISIS SINTACTICO DETALLADO
+% ===============================================
 
-% Ejemplos de prueba:
-% ?- probar_traduccion_ei('hola').
-% ?- probar_traduccion_ie('how are you').
-% ?- probar_traduccion_ei('el gato come').
-
-% ========== ANÁLISIS SINTÁCTICO ==========
-% Analiza la estructura de una oración
+% Analiza la estructura sintactica de una oracion
 analizar_oracion(OracionAtom) :-
+    writeln(''),
+    writeln('=== ANALISIS SINTACTICO ==='),
     oracion_a_lista(OracionAtom, Lista),
-    writeln('Análisis sintáctico:'),
-    (   oracion(Lista, [])
-    ->  writeln('✓ Oración válida'),
-        analizar_componentes(Lista)
-    ;   writeln('✗ Oración no válida según la gramática')
+    format('Oracion: ~w~n', [OracionAtom]),
+    format('Tokens: ~w~n', [Lista]),
+    writeln(''),
+    
+    (validar_y_parsear(Lista, Estructura) ->
+        writeln('Oracion valida segun la gramatica DCG'),
+        format('Estructura: ~w~n', [Estructura]),
+        writeln(''),
+        mostrar_componentes_detallados(Estructura)
+    ;
+        writeln('✗ Oracion no valida segun la gramatica'),
+        writeln('La oracion no se ajusta a las reglas DCG definidas')
+    ),
+    writeln('').
+
+% Muestra los componentes de una estructura de forma detallada
+mostrar_componentes_detallados(oracion(SN, SV)) :-
+    writeln('Componentes de la oracion:'),
+    format('  1. Sintagma Nominal: ~w~n', [SN]),
+    format('  2. Sintagma Verbal: ~w~n', [SV]),
+    
+    % Mostrar palabras del SN
+    (SN \= vacio ->
+        generar_sn(SN, PalabrasSN),
+        format('     Palabras SN: ~w~n', [PalabrasSN])
+    ; true),
+    
+    % Mostrar palabras del SV
+    generar_sv(SV, PalabrasSV),
+    format('     Palabras SV: ~w~n', [PalabrasSV]).
+
+mostrar_componentes_detallados(interjeccion(Palabra)) :-
+    format('Tipo: Interjeccion (~w)~n', [Palabra]).
+
+% ===============================================
+% VALIDACION DE GRAMATICA
+% ===============================================
+
+% Valida si una oracion cumple con la gramatica DCG
+validar_gramatica(Oracion) :-
+    oracion_a_lista(Oracion, Lista),
+    (es_oracion_valida(Lista) ->
+        writeln('✓ La oracion es VALIDA segun la gramatica DCG')
+    ;
+        writeln('✗ La oracion es INVALIDA segun la gramatica DCG')
     ).
 
-% Analiza los componentes de una oración
-analizar_componentes(Lista) :-
-    writeln('Componentes:'),
-    (   sintagma_nominal(SN, []),
-        append(SN, SV, Lista)
-    ->  format('  - Sintagma Nominal: ~w~n', [SN]),
-        format('  - Sintagma Verbal: ~w~n', [SV])
-    ;   format('  - Oración completa: ~w~n', [Lista])
-    ).
+% ===============================================
+% PRUEBAS DE EJEMPLO
+% ===============================================
 
-% ========== AYUDA ==========
+% Ejecuta una bateria de pruebas de ejemplo
+ejecutar_pruebas_ejemplo :-
+    writeln(''),
+    writeln('==========================================='),
+    writeln('        BATERIA DE PRUEBAS DE EJEMPLO     '),
+    writeln('==========================================='),
+    writeln(''),
+    
+    % Pruebas Espanol -> Ingles
+    writeln('--- TRADUCCIONES ESPANOL -> INGLES ---'),
+    writeln(''),
+    probar_traduccion_ei('hola'),
+    probar_traduccion_ei('el gato come'),
+    probar_traduccion_ei('la casa es grande'),
+    probar_traduccion_ei('yo como'),
+    
+    writeln(''),
+    writeln('--- TRADUCCIONES INGLES -> ESPANOL ---'),
+    writeln(''),
+    probar_traduccion_ie('hello'),
+    probar_traduccion_ie('the cat eats'),
+    probar_traduccion_ie('the house is big'),
+    probar_traduccion_ie('i eat'),
+    
+    writeln(''),
+    writeln('==========================================='),
+    writeln('        FIN DE PRUEBAS                    '),
+    writeln('==========================================='),
+    writeln('').
+
+% ===============================================
+% SISTEMA DE AYUDA
+% ===============================================
+
 mostrar_ayuda :-
     writeln(''),
-    writeln('=== COMANDOS DISPONIBLES ==='),
-    writeln('translog_ei.          - Inicia traductor Espanol->Ingles'),
-    writeln('translog_ie.          - Inicia traductor Ingles->Espanol'),
-    writeln('translog.             - Inicia traductor con auto-deteccion'),
-    writeln('mostrar_ayuda.        - Muestra esta ayuda'),
+    writeln('==========================================='),
+    writeln('          SISTEMA TRANSLOG - AYUDA        '),
+    writeln('==========================================='),
     writeln(''),
-    writeln('=== EJEMPLOS ==='),
-    writeln('probar_traduccion_ei(\'hola\').'),
-    writeln('probar_traduccion_ie(\'hello\').'),
-    writeln('analizar_oracion(\'el gato come\').'),
+    writeln('COMANDOS PRINCIPALES:'),
+    writeln('  translog_ei.              - Traductor Espanol->Ingles'),
+    writeln('  translog_ie.              - Traductor Ingles->Espanol'),
+    writeln('  translog.                 - Traductor con auto-deteccion'),
+    writeln(''),
+    writeln('COMANDOS DE PRUEBA:'),
+    writeln('  probar_traduccion_ei(\'texto\').  - Prueba ES->EN'),
+    writeln('  probar_traduccion_ie(\'text\').   - Prueba EN->ES'),
+    writeln('  ejecutar_pruebas_ejemplo.       - Ejecuta bateria completa'),
+    writeln(''),
+    writeln('COMANDOS DE ANALISIS:'),
+    writeln('  analizar_oracion(\'texto\').     - Analiza estructura sintactica'),
+    writeln('  validar_gramatica(\'texto\').    - Valida contra reglas DCG'),
+    writeln('  analizar_y_mostrar(\'texto\').   - Muestra estructura detallada'),
+    writeln(''),
+    writeln('OTROS:'),
+    writeln('  mostrar_ayuda.                 - Muestra esta ayuda'),
+    writeln(''),
+    writeln('EJEMPLOS DE USO:'),
+    writeln('  ?- probar_traduccion_ei(\'el gato come\').'),
+    writeln('  ?- probar_traduccion_ie(\'the cat eats\').'),
+    writeln('  ?- analizar_oracion(\'la casa es grande\').'),
+    writeln(''),
+    writeln('ARQUITECTURA DEL SISTEMA:'),
+    writeln('  BD.pl    - Base de datos de palabras (hechos)'),
+    writeln('  Logic.pl - Reglas de traduccion y estructuras'),
+    writeln('  BNF.pl   - Gramatica DCG e interfaz de usuario'),
+    writeln(''),
+    writeln('El sistema usa:'),
+    writeln('  1. Analisis sintactico con DCG'),
+    writeln('  2. Estructuras de datos: oracion(SN, SV)'),
+    writeln('  3. Traduccion basada en estructura sintactica'),
+    writeln('  4. Generacion de oraciones desde estructura'),
+    writeln(''),
+    writeln('==========================================='),
     writeln('').
+
+% ===============================================
+% INICIALIZACION
+% ===============================================
 
 % Mensaje de bienvenida al cargar el archivo
 :- initialization((
     writeln(''),
     writeln('==========================================='),
     writeln('       TransLog - Sistema Experto          '),
-    writeln('      Traduccion Espanol - Ingles           '),
+    writeln('      Traduccion Espanol <-> Ingles        '),
     writeln('==========================================='),
     writeln(''),
-    writeln('Escribe "mostrar_ayuda." para ver los comandos disponibles.'),
+    writeln('BD.pl cargado - Base de datos de palabras'),
+    writeln('Logic.pl cargado - Reglas de traduccion'),
+    writeln('BNF.pl cargado - Gramatica e interfaz'),
+    writeln(''),
+    writeln('Sistema listo. Escribe "mostrar_ayuda." para ver comandos.'),
     writeln('')
 )).
