@@ -1,488 +1,412 @@
-% Logic.pl - Reglas de Traduccion usando DCG
-% Este archivo implementa la logica de traduccion basada en analisis sintactico
+% ======================================================================
+% Logic.pl - VERSIÓN CON ANÁLISIS ESTRUCTURAL COMPLETO Y SIGNOS DE INTERROGACIÓN
+% ======================================================================
 
 :- consult('BD.pl').
 
-% ===============================================
-% ESTRUCTURAS DE DATOS
-% ===============================================
-% oracion(SN, SV) - Representa una oracion completa
-%   SN = sintagma_nominal(...)
-%   SV = sintagma_verbal(...)
-%
-% sintagma_nominal(Componentes)
-%   Ejemplos:
-%   - sn([det(el), nom(gato)])
-%   - sn([det(el), adj(grande), nom(gato)])
-%   - sn([pron(yo)])
-%
-% sintagma_verbal(Componentes)
-%   Ejemplos:
-%   - sv([v(come)])
-%   - sv([v(come), sn([det(el), nom(pescado)])])
-%   - sv([v(esta), sp([prep(en), sn([det(la), nom(casa)])])])
-%
-% sintagma_preposicional(prep, sn)
-%   - sp([prep(en), sn([det(la), nom(casa)])])
-
-% ===============================================
-% DETECCION DE IDIOMA
-% ===============================================
-% Detecta si una lista de palabras esta en espanol o ingles
-detectar_idioma([], espanol).
-detectar_idioma([P|_], espanol) :- palabra(P, _, _), !.
-detectar_idioma([P|_], ingles)  :- palabra(_, P, _), !.
-detectar_idioma([_|R], Idioma)  :- detectar_idioma(R, Idioma).
-
-% ===============================================
-% NORMALIZACION Y CONVERSION
-% ===============================================
-% Normaliza una palabra: minusculas y sin puntuacion
-normalizar_palabra(P, N) :-
-    atom(P),
-    downcase_atom(P, M),
-    atom_chars(M, Ch),
-    eliminar_puntuacion(Ch, Limp),
-    atom_chars(N, Limp).
-
-eliminar_puntuacion([], []).
-eliminar_puntuacion([C|R], [C|R2]) :- 
-    char_type(C, alpha), !, 
-    eliminar_puntuacion(R, R2).
-eliminar_puntuacion([C|R], [C|R2]) :- 
-    char_type(C, space), !, 
-    eliminar_puntuacion(R, R2).
-eliminar_puntuacion([_|R], R2) :- 
-    eliminar_puntuacion(R, R2).
-
-% Convierte una oracion (atom) a lista de palabras
-oracion_a_lista(O, L) :- 
-    atom(O), 
-    atomic_list_concat(Ps, ' ', O), 
-    maplist(normalizar_palabra, Ps, L).
-
-% Convierte lista de palabras a oracion (atom)
-lista_a_oracion([], '').
-lista_a_oracion([P], P) :- !.
-lista_a_oracion([P|R], O) :- 
-    lista_a_oracion(R, OR), 
-    atomic_list_concat([P, OR], ' ', O).
-
-% Capitaliza la primera letra de una oracion
-capitalizar_oracion(O, OC) :-
-    O \= '',
-    atom_chars(O, [X|R]),
-    upcase_atom(X, XU),
-    atom_chars(XU, [XUC]),
-    atom_chars(OC, [XUC|R]), !.
-capitalizar_oracion(O, O).
-
-% ===============================================
-% ANALISIS SINTACTICO CON DCG
-% ===============================================
-% Analiza una oracion y devuelve su estructura sintactica
-
-% Oracion completa: SN + SV o solo SV o interjeccion
-analizar_oracion_dcg(Lista, oracion(SN, SV)) :-
-    append(L1, L2, Lista),
-    L1 \= [], L2 \= [],
-    parsear_sn(L1, SN),
-    parsear_sv(L2, SV), !.
-
-analizar_oracion_dcg(Lista, oracion(vacio, SV)) :-
-    parsear_sv(Lista, SV), !.
-
-analizar_oracion_dcg([hola], interjeccion(hola)) :- !.
-analizar_oracion_dcg([hello], interjeccion(hello)) :- !.
-
-% Parsear Sintagma Nominal
-parsear_sn([Det, Nom], sn([det(Det), nom(Nom)])) :-
-    palabra(Det, _, articulo),
-    palabra(Nom, _, sustantivo), !.
-
-parsear_sn([Det, Adj, Nom], sn([det(Det), adj(Adj), nom(Nom)])) :-
-    palabra(Det, _, articulo),
-    palabra(Adj, _, adjetivo),
-    palabra(Nom, _, sustantivo), !.
-
-parsear_sn([Nom], sn([nom(Nom)])) :-
-    palabra(Nom, _, sustantivo), !.
-
-parsear_sn([Pron], sn([pron(Pron)])) :-
-    palabra(Pron, _, pronombre), !.
-
-% Parsear Sintagma Verbal
-parsear_sv([V], sv([v(V)])) :-
-    palabra(V, _, verbo), !.
-
-parsear_sv(Lista, sv([v(V), SN])) :-
-    Lista = [V|Resto],
-    palabra(V, _, verbo),
-    parsear_sn(Resto, SN), !.
-
-parsear_sv(Lista, sv([v(V), SP])) :-
-    Lista = [V|Resto],
-    palabra(V, _, verbo),
-    parsear_sp(Resto, SP), !.
-
-parsear_sv(Lista, sv([v(V), Comp])) :-
-    Lista = [V, Palabra|_],
-    palabra(V, _, verbo),
-    (palabra(Palabra, _, adjetivo) -> Comp = adj(Palabra)
-    ; palabra(Palabra, _, adverbio) -> Comp = adv(Palabra)
-    ; fail), !.
-
-% Parsear Sintagma Preposicional
-parsear_sp([Prep|Resto], sp([prep(Prep), SN])) :-
-    palabra(Prep, _, preposicion),
-    parsear_sn(Resto, SN), !.
-
-parsear_sp([Prep, Nom], sp([prep(Prep), nom(Nom)])) :-
-    palabra(Prep, _, preposicion),
-    palabra(Nom, _, sustantivo), !.
-
-% ===============================================
-% TRADUCCION DE ESTRUCTURAS
-% ===============================================
-% Traduce una estructura sintactica de un idioma a otro
-
-% Traducir oracion completa
-traducir_estructura(oracion(SN, SV), espanol, ingles, oracion(SNen, SVen)) :-
-    traducir_sn(SN, espanol, ingles, SNen),
-    traducir_sv(SV, espanol, ingles, SVen).
-
-traducir_estructura(oracion(SN, SV), ingles, espanol, oracion(SNes, SVes)) :-
-    traducir_sn(SN, ingles, espanol, SNes),
-    traducir_sv(SV, ingles, espanol, SVes).
-
-traducir_estructura(interjeccion(hola), espanol, ingles, interjeccion(hello)).
-traducir_estructura(interjeccion(hello), ingles, espanol, interjeccion(hola)).
-
-% Traducir Sintagma Nominal
-traducir_sn(vacio, _, _, vacio) :- !.
-
-traducir_sn(sn(Componentes), Origen, Destino, sn(ComponentesTraducidos)) :-
-    traducir_componentes_sn(Componentes, Origen, Destino, ComponentesTraducidos).
-
-% Traducir componentes de SN
-traducir_componentes_sn([], _, _, []).
-
-traducir_componentes_sn([det(D)|R], espanol, ingles, [det(Den)|R2]) :-
-    palabra(D, Den, articulo), !,
-    traducir_componentes_sn(R, espanol, ingles, R2).
-
-traducir_componentes_sn([det(D)|R], ingles, espanol, [det(Des)|R2]) :-
-    palabra(Des, D, articulo), !,
-    traducir_componentes_sn(R, ingles, espanol, R2).
-
-traducir_componentes_sn([nom(N)|R], espanol, ingles, [nom(Nen)|R2]) :-
-    palabra(N, Nen, sustantivo), !,
-    traducir_componentes_sn(R, espanol, ingles, R2).
-
-traducir_componentes_sn([nom(N)|R], ingles, espanol, [nom(Nes)|R2]) :-
-    palabra(Nes, N, sustantivo), !,
-    traducir_componentes_sn(R, ingles, espanol, R2).
-
-traducir_componentes_sn([adj(A)|R], espanol, ingles, [adj(Aen)|R2]) :-
-    palabra(A, Aen, adjetivo), !,
-    traducir_componentes_sn(R, espanol, ingles, R2).
-
-traducir_componentes_sn([adj(A)|R], ingles, espanol, [adj(Aes)|R2]) :-
-    palabra(Aes, A, adjetivo), !,
-    traducir_componentes_sn(R, ingles, espanol, R2).
-
-traducir_componentes_sn([pron(P)|R], espanol, ingles, [pron(Pen)|R2]) :-
-    palabra(P, Pen, pronombre), !,
-    traducir_componentes_sn(R, espanol, ingles, R2).
-
-traducir_componentes_sn([pron(P)|R], ingles, espanol, [pron(Pes)|R2]) :-
-    palabra(Pes, P, pronombre), !,
-    traducir_componentes_sn(R, ingles, espanol, R2).
-
-traducir_componentes_sn([H|R], O, D, [H|R2]) :-
-    traducir_componentes_sn(R, O, D, R2).
-
-% Traducir Sintagma Verbal
-traducir_sv(sv(Componentes), Origen, Destino, sv(ComponentesTraducidos)) :-
-    traducir_componentes_sv(Componentes, Origen, Destino, ComponentesTraducidos).
-
-% Traducir componentes de SV
-traducir_componentes_sv([], _, _, []).
-
-traducir_componentes_sv([v(V)|R], espanol, ingles, [v(Ven)|R2]) :-
-    palabra(V, Ven, verbo), !,
-    traducir_componentes_sv(R, espanol, ingles, R2).
-
-traducir_componentes_sv([v(V)|R], ingles, espanol, [v(Ves)|R2]) :-
-    palabra(Ves, V, verbo), !,
-    traducir_componentes_sv(R, ingles, espanol, R2).
-
-traducir_componentes_sv([SN|R], O, D, [SNt|R2]) :-
-    SN = sn(_),
-    traducir_sn(SN, O, D, SNt), !,
-    traducir_componentes_sv(R, O, D, R2).
-
-traducir_componentes_sv([SP|R], O, D, [SPt|R2]) :-
-    SP = sp(_),
-    traducir_sp(SP, O, D, SPt), !,
-    traducir_componentes_sv(R, O, D, R2).
-
-traducir_componentes_sv([adj(A)|R], espanol, ingles, [adj(Aen)|R2]) :-
-    palabra(A, Aen, adjetivo), !,
-    traducir_componentes_sv(R, espanol, ingles, R2).
-
-traducir_componentes_sv([adj(A)|R], ingles, espanol, [adj(Aes)|R2]) :-
-    palabra(Aes, A, adjetivo), !,
-    traducir_componentes_sv(R, ingles, espanol, R2).
-
-traducir_componentes_sv([adv(A)|R], espanol, ingles, [adv(Aen)|R2]) :-
-    palabra(A, Aen, adverbio), !,
-    traducir_componentes_sv(R, espanol, ingles, R2).
-
-traducir_componentes_sv([adv(A)|R], ingles, espanol, [adv(Aes)|R2]) :-
-    palabra(Aes, A, adverbio), !,
-    traducir_componentes_sv(R, ingles, espanol, R2).
-
-traducir_componentes_sv([H|R], O, D, [H|R2]) :-
-    traducir_componentes_sv(R, O, D, R2).
-
-% Traducir Sintagma Preposicional
-traducir_sp(sp(Componentes), Origen, Destino, sp(ComponentesTraducidos)) :-
-    traducir_componentes_sp(Componentes, Origen, Destino, ComponentesTraducidos).
-
-traducir_componentes_sp([], _, _, []).
-
-traducir_componentes_sp([prep(P)|R], espanol, ingles, [prep(Pen)|R2]) :-
-    palabra(P, Pen, preposicion), !,
-    traducir_componentes_sp(R, espanol, ingles, R2).
-
-traducir_componentes_sp([prep(P)|R], ingles, espanol, [prep(Pes)|R2]) :-
-    palabra(Pes, P, preposicion), !,
-    traducir_componentes_sp(R, ingles, espanol, R2).
-
-traducir_componentes_sp([SN|R], O, D, [SNt|R2]) :-
-    SN = sn(_),
-    traducir_sn(SN, O, D, SNt), !,
-    traducir_componentes_sp(R, O, D, R2).
-
-traducir_componentes_sp([nom(N)|R], espanol, ingles, [nom(Nen)|R2]) :-
-    palabra(N, Nen, sustantivo), !,
-    traducir_componentes_sp(R, espanol, ingles, R2).
-
-traducir_componentes_sp([nom(N)|R], ingles, espanol, [nom(Nes)|R2]) :-
-    palabra(Nes, N, sustantivo), !,
-    traducir_componentes_sp(R, ingles, espanol, R2).
-
-traducir_componentes_sp([H|R], O, D, [H|R2]) :-
-    traducir_componentes_sp(R, O, D, R2).
-
-% ===============================================
-% GENERACION DE ORACIONES DESDE ESTRUCTURA
-% ===============================================
-% Convierte una estructura sintactica de vuelta a lista de palabras
-
-generar_oracion_desde_estructura(interjeccion(Palabra), [Palabra]) :- !.
-
-generar_oracion_desde_estructura(oracion(SN, SV), Lista) :-
-    generar_sn(SN, ListaSN),
-    generar_sv(SV, ListaSV),
-    append(ListaSN, ListaSV, Lista).
-
-% Generar palabras desde SN
-generar_sn(vacio, []) :- !.
-generar_sn(sn(Componentes), Lista) :-
-    generar_componentes(Componentes, Lista).
-
-% Generar palabras desde SV
-generar_sv(sv(Componentes), Lista) :-
-    generar_componentes(Componentes, Lista).
-
-% Generar palabras desde SP
-generar_sp(sp(Componentes), Lista) :-
-    generar_componentes(Componentes, Lista).
-
-% Generar componentes genericos
-generar_componentes([], []).
-
-generar_componentes([det(D)|R], [D|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([nom(N)|R], [N|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([adj(A)|R], [A|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([v(V)|R], [V|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([pron(P)|R], [P|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([prep(P)|R], [P|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([adv(A)|R], [A|R2]) :-
-    generar_componentes(R, R2).
-
-generar_componentes([SN|R], Lista) :-
-    SN = sn(_),
-    generar_sn(SN, L1),
-    generar_componentes(R, L2),
-    append(L1, L2, Lista).
-
-generar_componentes([SV|R], Lista) :-
-    SV = sv(_),
-    generar_sv(SV, L1),
-    generar_componentes(R, L2),
-    append(L1, L2, Lista).
-
-generar_componentes([SP|R], Lista) :-
-    SP = sp(_),
-    generar_sp(SP, L1),
-    generar_componentes(R, L2),
-    append(L1, L2, Lista).
-
-% ===============================================
-% AJUSTES POST-TRADUCCION
-% ===============================================
-% Ajustes necesarios para corregir genero, articulos, orden, etc.
-
-% Ajustar orden de adjetivos (ingles: adj antes de nom, espanol: despues)
-ajustar_orden_ingles([], []).
-ajustar_orden_ingles([Nom, Adj|R], [Adj, Nom|R2]) :-
-    palabra(_, Nom, sustantivo),
-    palabra(_, Adj, adjetivo), !,
-    ajustar_orden_ingles(R, R2).
-ajustar_orden_ingles([H|R], [H|R2]) :-
-    ajustar_orden_ingles(R, R2).
-
-ajustar_orden_espanol([], []).
-ajustar_orden_espanol([Adj, Nom|R], [Nom, Adj|R2]) :-
-    palabra(Adj, _, adjetivo),
-    palabra(Nom, _, sustantivo), !,
-    ajustar_orden_espanol(R, R2).
-ajustar_orden_espanol([H|R], [H|R2]) :-
-    ajustar_orden_espanol(R, R2).
-
-% Ajustar genero de articulos en espanol
-femenino(casa). femenino(mesa). femenino(silla). femenino(computadora).
-femenino(mujer). femenino(familia). femenino(escuela). femenino(universidad).
-femenino(ciudad). femenino(mano). femenino(agua).
-
-ajustar_genero_articulos([], []).
-ajustar_genero_articulos([el, N|R], [la, N|R2]) :-
-    femenino(N), !,
-    ajustar_genero_articulos(R, R2).
-ajustar_genero_articulos([un, N|R], [una, N|R2]) :-
-    femenino(N), !,
-    ajustar_genero_articulos(R, R2).
-ajustar_genero_articulos([H|R], [H|R2]) :-
-    ajustar_genero_articulos(R, R2).
-
-% Agregar signos de interrogacion
-agregar_interrogacion(Lista, ListaConSigno) :-
-    (member(how, Lista) ; member(what, Lista) ; member(where, Lista)),
-    append(Lista, ['?'], ListaConSigno), !.
-agregar_interrogacion(Lista, Lista).
-
-% ===============================================
-% FUNCIONES PRINCIPALES DE TRADUCCION
-% ===============================================
-
-% ALGORITMO DE TRADUCCION ESPANOL -> INGLES
-% Paso 1: Convertir oracion a lista de palabras
-% Paso 2: Analizar sintacticamente con DCG (parsear a estructura)
-% Paso 3: Traducir la estructura sintactica
-% Paso 4: Generar lista de palabras desde estructura traducida
-% Paso 5: Ajustar orden y detalles especificos del idioma destino
-% Paso 6: Convertir lista a oracion y capitalizar
-
-traducir_esp_a_ing(OracionEsp, OracionIng) :-
-    % Paso 1: Tokenizar
-    oracion_a_lista(OracionEsp, ListaEsp),
-    
-    % Paso 2: Analisis sintactico
-    (analizar_oracion_dcg(ListaEsp, Estructura) ->
-        % Paso 3: Traduccion de estructura
-        traducir_estructura(Estructura, espanol, ingles, EstructuraEn),
-        
-        % Paso 4: Generacion
-        generar_oracion_desde_estructura(EstructuraEn, ListaEn0)
+% ----------------------------------------------------------------------
+% TRADUCCIÓN PALABRA POR PALABRA CON CONTEXTO
+% ----------------------------------------------------------------------
+
+% Traducción normal para la mayoría de palabras
+traducir_palabra_es_en(Palabra, Traduccion) :-
+    atom(Palabra),
+    (sustantivo(Palabra, Traduccion, _, _)
+    ; pronombre(Palabra, Traduccion, _, _)
+    ; verbo(Palabra, Traduccion, _, _, _)
+    ; adjetivo(Palabra, Traduccion)
+    ; articulo(Palabra, Traduccion, _, _)
+    ; preposicion(Palabra, Traduccion)
+    ; conjuncion(Palabra, Traduccion)
+    ; adverbio(Palabra, Traduccion)
+    ; interrogativo(Palabra, Traduccion)
+    ; auxiliar(Palabra, Traduccion, _, _)
+    ; expresion(Palabra, Traduccion)
+    ; Traduccion = Palabra
+    ), !.
+
+traducir_palabra_en_es(Palabra, Traduccion) :-
+    atom(Palabra),
+    (sustantivo(Traduccion, Palabra, _, _)
+    ; pronombre(Traduccion, Palabra, _, _)
+    ; verbo(Traduccion, Palabra, _, _, _)
+    ; adjetivo(Traduccion, Palabra)
+    ; articulo(Traduccion, Palabra, _, _)
+    ; preposicion(Traduccion, Palabra)
+    ; conjuncion(Traduccion, Palabra)
+    ; adverbio(Traduccion, Palabra)
+    ; interrogativo(Traduccion, Palabra)
+    ; auxiliar(Traduccion, Palabra, _, _)
+    ; expresion(Traduccion, Palabra)
+    ; Traduccion = Palabra
+    ), !.
+
+% ----------------------------------------------------------------------
+% FUNCIONES PRINCIPALES CON ANÁLISIS ESTRUCTURAL Y SIGNOS DE INTERROGACIÓN
+% ----------------------------------------------------------------------
+
+traducir_espanol_ingles(TextoES, TextoEN) :-
+    atom(TextoES),
+    % Preservar si es pregunta desde el inicio
+    (es_pregunta(TextoES) -> 
+        normalizar_texto_con_pregunta(TextoES, Norm, '?')
     ;
-        % Fallback: traduccion palabra por palabra si no se puede parsear
-        traducir_lista_simple(ListaEsp, espanol, ingles, ListaEn0)
+        normalizar_texto(TextoES, Norm)
     ),
     
-    % Paso 5: Ajustes post-traduccion
-    ajustar_orden_ingles(ListaEn0, ListaEn1),
-    agregar_interrogacion(ListaEn1, ListaEn2),
-    
-    % Paso 6: Generar oracion final
-    lista_a_oracion(ListaEn2, OracionSinCap),
-    capitalizar_oracion(OracionSinCap, OracionIng).
-
-% ALGORITMO DE TRADUCCION INGLES -> ESPANOL
-traducir_ing_a_esp(OracionIng, OracionEsp) :-
-    % Paso 1: Tokenizar
-    oracion_a_lista(OracionIng, ListaIng),
-    
-    % Paso 2: Analisis sintactico
-    (analizar_oracion_dcg(ListaIng, Estructura) ->
-        % Paso 3: Traduccion de estructura
-        traducir_estructura(Estructura, ingles, espanol, EstructuraEs),
-        
-        % Paso 4: Generacion
-        generar_oracion_desde_estructura(EstructuraEs, ListaEs0)
+    (expresion(Norm, Direct) -> 
+        capitalizar(Direct, TextoBase),
+        (es_pregunta(TextoES) -> 
+            atom_concat(TextoBase, '?', TextoEN)
+        ;
+            TextoEN = TextoBase
+        )
     ;
-        % Fallback: traduccion palabra por palabra
-        traducir_lista_simple(ListaIng, ingles, espanol, ListaEs0)
+        dividir_en_palabras(Norm, Palabras),
+        expandir_contracciones_es(Palabras, PalabrasExpandidas),
+        
+        % USAR ANÁLISIS ESTRUCTURAL DCG
+        (oracion_estructura_es(Estructura, PalabrasExpandidas, []) ->
+            traducir_estructura_es_en(Estructura, EstructuraEN),
+            generar_texto_en(EstructuraEN, TempEN),
+            corregir_errores_finales(TempEN, TempCorregido),
+            capitalizar(TempCorregido, TextoBase),
+            (es_pregunta(TextoES) -> 
+                atom_concat(TextoBase, '?', TextoEN)
+            ;
+                agregar_puntuacion_final(TextoBase, TextoEN)
+            )
+        ;
+            % Fallback a traducción palabra por palabra
+            traducir_lista_con_contexto_es_en(PalabrasExpandidas, PalabrasEN),
+            atomic_list_concat(PalabrasEN, ' ', TempEN),
+            corregir_errores_finales(TempEN, TempCorregido),
+            capitalizar(TempCorregido, TextoBase),
+            (es_pregunta(TextoES) -> 
+                atom_concat(TextoBase, '?', TextoEN)
+            ;
+                agregar_puntuacion_final(TextoBase, TextoEN)
+            )
+        )
+    ).
+
+traducir_ingles_espanol(TextoEN, TextoES) :-
+    atom(TextoEN),
+    % Preservar si es pregunta
+    (es_pregunta(TextoEN) -> 
+        normalizar_texto_con_pregunta(TextoEN, Norm, '?')
+    ;
+        normalizar_texto(TextoEN, Norm)
     ),
     
-    % Paso 5: Ajustes post-traduccion
-    ajustar_orden_espanol(ListaEs0, ListaEs1),
-    ajustar_genero_articulos(ListaEs1, ListaEs2),
+    (expresion(Direct, Norm) -> 
+        capitalizar(Direct, TextoBase),
+        (es_pregunta(TextoEN) -> 
+            atom_concat(TextoBase, '?', TextoES)
+        ;
+            TextoES = TextoBase
+        )
+    ;
+        dividir_en_palabras(Norm, Palabras),
+        expandir_contracciones(Palabras, PalabrasExpandidas),
+        
+        % USAR ANÁLISIS ESTRUCTURAL DCG
+        (oracion_estructura_en(Estructura, PalabrasExpandidas, []) ->
+            traducir_estructura_en_es(Estructura, EstructuraES),
+            generar_texto_es(EstructuraES, TempES),
+            capitalizar(TempES, TextoBase),
+            (es_pregunta(TextoEN) -> 
+                atom_concat(TextoBase, '?', TextoES)
+            ;
+                agregar_puntuacion_final(TextoBase, TextoES)
+            )
+        ;
+            % Fallback simple
+            traducir_lista_en_es(PalabrasExpandidas, PalabrasES),
+            atomic_list_concat(PalabrasES, ' ', TempES),
+            capitalizar(TempES, TextoBase),
+            (es_pregunta(TextoEN) -> 
+                atom_concat(TextoBase, '?', TextoES)
+            ;
+                agregar_puntuacion_final(TextoBase, TextoES)
+            )
+        )
+    ).
+
+% Detectar si es pregunta
+es_pregunta(Texto) :-
+    sub_atom(Texto, _, 1, 0, '?').
+
+% Normalizar texto preservando el tipo de pregunta
+normalizar_texto_con_pregunta(Texto, TextoNorm, Signo) :-
+    downcase_atom(Texto, TextoLower),
+    atom_chars(TextoLower, Chars),
+    (Chars = [] -> 
+        TextoNorm = ''
+    ;
+        reverse(Chars, [Signo|RevRest]),
+        reverse(RevRest, CleanChars),
+        atom_chars(TextoNorm, CleanChars)
+    ).
+
+% ----------------------------------------------------------------------
+% TRADUCCIÓN CON LÓGICA INTELIGENTE PARA "el" vs "él" (solo para fallback)
+% ----------------------------------------------------------------------
+
+traducir_lista_con_contexto_es_en([], []).
+traducir_lista_con_contexto_es_en([el|Resto], [Traduccion|RestoT]) :-
+    % VERSIÓN INFALIBLE: Si la siguiente palabra está en BD como verbo -> "he"
+    (Resto = [Siguiente|_], verbo(Siguiente, _, _, _, _) -> 
+        Traduccion = he    % "él" es pronombre
+    ; 
+        Traduccion = the   % "el" es artículo  
+    ),
+    traducir_lista_con_contexto_es_en(Resto, RestoT).
     
-    % Paso 6: Generar oracion final
-    lista_a_oracion(ListaEs2, OracionSinCap),
-    capitalizar_oracion(OracionSinCap, OracionEsp).
+traducir_lista_con_contexto_es_en([P|Resto], [T|RestoT]) :-
+    traducir_palabra_es_en(P, T),
+    traducir_lista_con_contexto_es_en(Resto, RestoT).
 
-% Traduccion simple palabra por palabra (fallback)
-traducir_lista_simple([], _, _, []).
-traducir_lista_simple([P|R], espanol, ingles, [T|R2]) :-
-    (palabra(P, T, _) -> true ; T = P),
-    traducir_lista_simple(R, espanol, ingles, R2).
-traducir_lista_simple([P|R], ingles, espanol, [T|R2]) :-
-    (palabra(T, P, _) -> true ; T = P),
-    traducir_lista_simple(R, ingles, espanol, R2).
+% Traducción de lista normal (para inglés->español - fallback)
+traducir_lista_en_es([], []).
+traducir_lista_en_es([P|Resto], [T|RestoT]) :-
+    traducir_palabra_en_es(P, T),
+    traducir_lista_en_es(Resto, RestoT).
 
-% Traduccion con auto-deteccion de idioma
-traducir_auto(Entrada, Salida) :-
-    oracion_a_lista(Entrada, Lista),
-    detectar_idioma(Lista, Idioma),
-    (Idioma = espanol ->
-        traducir_esp_a_ing(Entrada, Salida)
+% ----------------------------------------------------------------------
+% CORRECCIONES FINALES MEJORADAS
+% ----------------------------------------------------------------------
+
+corregir_errores_finales(Texto, Corregido) :-
+    atomic_list_concat(Palabras, ' ', Texto),
+    corregir_lista_errores_mejorada(Palabras, Corregidas),
+    atomic_list_concat(Corregidas, ' ', Corregido).
+
+corregir_lista_errores_mejorada([], []).
+% Corregir "Am fine" → "I am fine"
+corregir_lista_errores_mejorada([am|Resto], [i, am|RestoCorregido]) :- !,
+    corregir_lista_errores_mejorada(Resto, RestoCorregido).
+% Corregir "go to ir" → "go to go"
+corregir_lista_errores_mejorada([go, to, ir|Resto], [go, to, go|RestoCorregido]) :- !,
+    corregir_lista_errores_mejorada(Resto, RestoCorregido).
+% Corregir "He dog" → "The dog" (por si falla la lógica principal)
+corregir_lista_errores_mejorada([he, Sustantivo|Resto], [the, Sustantivo|RestoCorregido]) :-
+    sustantivo(Sustantivo, _, _, _), !,
+    corregir_lista_errores_mejorada(Resto, RestoCorregido).
+corregir_lista_errores_mejorada([P|Resto], [P|RestoCorregido]) :-
+    corregir_lista_errores_mejorada(Resto, RestoCorregido).
+
+% ----------------------------------------------------------------------
+% TRADUCCIÓN DE ESTRUCTURAS - MEJORADA PARA MANEJAR "el" vs "él"
+% ----------------------------------------------------------------------
+
+% ES -> EN
+traducir_estructura_es_en(oracion(SN, SV), oracion(SN_EN, SV_EN)) :-
+    traducir_sn_es_en(SN, SN_EN),
+    traducir_sv_es_en(SV, SV_EN).
+
+traducir_sn_es_en(sn(Art, Sust), sn(Art_EN, Sust_EN)) :-
+    traducir_articulo_es_en(Art, Art_EN),
+    traducir_sustantivo_es_en(Sust, Sust_EN).
+
+traducir_sn_es_en(sn(Pron), sn(Pron_EN)) :-
+    traducir_pronombre_es_en(Pron, Pron_EN).
+
+traducir_sv_es_en(sv(Verbo), sv(Verbo_EN)) :-
+    traducir_verbo_es_en(Verbo, Verbo_EN).
+
+traducir_sv_es_en(sv(Verbo, SN), sv(Verbo_EN, SN_EN)) :-
+    traducir_verbo_es_en(Verbo, Verbo_EN),
+    traducir_sn_es_en(SN, SN_EN).
+
+% Componentes individuales MEJORADOS para "el" vs "él"
+traducir_articulo_es_en(art(el, _, _), art(the)) :- !.  % "el" artículo -> "the"
+traducir_articulo_es_en(art(A, _, _), art(ArtEN)) :-
+    traducir_palabra_es_en(A, ArtEN).
+
+traducir_sustantivo_es_en(sust(S, _, _), sust(SustEN)) :-
+    traducir_palabra_es_en(S, SustEN).
+
+traducir_verbo_es_en(verbo(V, _, _, _), verbo(VerboEN)) :-
+    traducir_palabra_es_en(V, VerboEN).
+
+traducir_pronombre_es_en(pron(el, _, _), pron(he)) :- !.  % "él" pronombre -> "he"
+traducir_pronombre_es_en(pron(P, _, _), pron(PronEN)) :-
+    traducir_palabra_es_en(P, PronEN).
+
+% EN -> ES
+traducir_estructura_en_es(oracion(SN, SV), oracion(SN_ES, SV_ES)) :-
+    traducir_sn_en_es(SN, SN_ES),
+    traducir_sv_en_es(SV, SV_ES).
+
+traducir_sn_en_es(sn(Art, Sust), sn(Art_ES, Sust_ES)) :-
+    traducir_articulo_en_es(Art, Art_ES),
+    traducir_sustantivo_en_es(Sust, Sust_ES).
+
+traducir_sn_en_es(sn(Pron), sn(Pron_ES)) :-
+    traducir_pronombre_en_es(Pron, Pron_ES).
+
+traducir_sv_en_es(sv(Verbo), sv(Verbo_ES)) :-
+    traducir_verbo_en_es(Verbo, Verbo_ES).
+
+traducir_sv_en_es(sv(Verbo, SN), sv(Verbo_ES, SN_ES)) :-
+    traducir_verbo_en_es(Verbo, Verbo_ES),
+    traducir_sn_en_es(SN, SN_ES).
+
+% Componentes individuales inversos
+traducir_articulo_en_es(art(A), art(ArtES, G, N)) :-
+    (articulo(ArtES, A, G, N) -> true; ArtES = el, G = masculino, N = singular).
+
+traducir_sustantivo_en_es(sust(S), sust(SustES, G, N)) :-
+    (sustantivo(SustES, S, G, N) -> true; SustES = S, G = masculino, N = singular).
+
+traducir_verbo_en_es(verbo(V), verbo(VerboES, T, P, N)) :-
+    (verbo(VerboES, V, T, P, N) -> true; VerboES = V, T = presente, P = tercera, N = singular).
+
+traducir_pronombre_en_es(pron(P), pron(PronES, Pers, N)) :-
+    (pronombre(PronES, P, Pers, N) -> true; PronES = el, Pers = tercera, N = singular).
+
+% ----------------------------------------------------------------------
+% GENERACIÓN DE TEXTO
+% ----------------------------------------------------------------------
+
+generar_texto_en(oracion(SN, SV), Texto) :-
+    generar_sn_en(SN, TextoSN),
+    generar_sv_en(SV, TextoSV),
+    atomic_list_concat([TextoSN, TextoSV], ' ', Texto).
+
+generar_sn_en(sn(art(A), sust(S)), Texto) :-
+    atomic_list_concat([A, S], ' ', Texto).
+generar_sn_en(sn(pron(P)), P).
+generar_sn_en(sn(sust(S)), S).
+
+generar_sv_en(sv(verbo(V)), V).
+generar_sv_en(sv(verbo(V), SN), Texto) :-
+    generar_sn_en(SN, TextoSN),
+    atomic_list_concat([V, TextoSN], ' ', Texto).
+
+generar_texto_es(oracion(SN, SV), Texto) :-
+    generar_sn_es(SN, TextoSN),
+    generar_sv_es(SV, TextoSV),
+    atomic_list_concat([TextoSN, TextoSV], ' ', Texto).
+
+generar_sn_es(sn(art(A, _, _), sust(S, _, _)), Texto) :-
+    atomic_list_concat([A, S], ' ', Texto).
+generar_sn_es(sn(pron(P, _, _)), P).
+generar_sn_es(sn(sust(S, _, _)), S).
+
+generar_sv_es(sv(verbo(V, _, _, _)), V).
+generar_sv_es(sv(verbo(V, _, _, _), SN), Texto) :-
+    generar_sn_es(SN, TextoSN),
+    atomic_list_concat([V, TextoSN], ' ', Texto).
+
+% ----------------------------------------------------------------------
+% GRAMÁTICAS DCG - COMPLETAS Y MEJORADAS
+% ----------------------------------------------------------------------
+
+% ESPAÑOL: Oración → Sintagma Nominal + Sintagma Verbal
+oracion_estructura_es(oracion(SN, SV)) --> 
+    sintagma_nominal_es(SN), 
+    sintagma_verbal_es(SV).
+
+% Sintagma Nominal → Artículo + Sustantivo O Pronombre
+sintagma_nominal_es(sn(Art, Sust)) --> 
+    articulo_es(Art), 
+    sustantivo_es(Sust).
+
+sintagma_nominal_es(sn(Pron)) --> 
+    pronombre_es(Pron).
+
+% Sintagma Verbal → Verbo O Verbo + Sintagma Nominal
+sintagma_verbal_es(sv(Verbo)) --> 
+    verbo_es(Verbo).
+
+sintagma_verbal_es(sv(Verbo, SN)) --> 
+    verbo_es(Verbo), 
+    sintagma_nominal_es(SN).
+
+% Componentes básicos en español
+articulo_es(art(A, G, N)) --> [A], {articulo(A, _, G, N)}.
+sustantivo_es(sust(S, G, N)) --> [S], {sustantivo(S, _, G, N)}.
+verbo_es(verbo(V, T, P, N)) --> [V], {verbo(V, _, T, P, N)}.
+pronombre_es(pron(P, Pers, N)) --> [P], {pronombre(P, _, Pers, N)}.
+
+% INGLÉS: Oración → Sintagma Nominal + Sintagma Verbal
+oracion_estructura_en(oracion(SN, SV)) --> 
+    sintagma_nominal_en(SN), 
+    sintagma_verbal_en(SV).
+
+% Sintagma Nominal → Artículo + Sustantivo O Pronombre
+sintagma_nominal_en(sn(Art, Sust)) --> 
+    articulo_en(Art), 
+    sustantivo_en(Sust).
+
+sintagma_nominal_en(sn(Pron)) --> 
+    pronombre_en(Pron).
+
+% Sintagma Verbal → Verbo O Verbo + Sintagma Nominal
+sintagma_verbal_en(sv(Verbo)) --> 
+    verbo_en(Verbo).
+
+sintagma_verbal_en(sv(Verbo, SN)) --> 
+    verbo_en(Verbo), 
+    sintagma_nominal_en(SN).
+
+% Componentes básicos en inglés
+articulo_en(art(A)) --> [A], {articulo(_, A, _, _)}.
+sustantivo_en(sust(S)) --> [S], {sustantivo(_, S, _, _)}.
+verbo_en(verbo(V)) --> [V], {verbo(_, V, _, _, _)}.
+pronombre_en(pron(P)) --> [P], {pronombre(_, P, _, _)}.
+
+% ----------------------------------------------------------------------
+% UTILIDADES MEJORADAS CON SIGNOS DE INTERROGACIÓN
+% ----------------------------------------------------------------------
+
+normalizar_texto(Texto, TextoNorm) :-
+    downcase_atom(Texto, TextoLower),
+    atom_chars(TextoLower, Chars),
+    (Chars = [] -> 
+        TextoNorm = ''
     ;
-        traducir_ing_a_esp(Entrada, Salida)
+        % Separar el texto del signo de puntuación final
+        (last(Chars, Ultimo), member(Ultimo, ['.', '!', '?']) ->
+            append(CleanChars, [Ultimo], Chars),
+            atom_chars(TextoClean, CleanChars),
+            TextoNorm = TextoClean
+        ;
+            TextoNorm = TextoLower
+        )
     ).
 
-% ===============================================
-% PREDICADOS DE ANALISIS Y DEBUG
-% ===============================================
+dividir_en_palabras(Texto, Palabras) :-
+    atomic_list_concat(Temp, ' ', Texto),
+    exclude(=(''), Temp, Palabras).
 
-% Muestra la estructura sintactica de una oracion
-analizar_y_mostrar(Oracion) :-
-    oracion_a_lista(Oracion, Lista),
-    write('Lista de palabras: '), writeln(Lista),
-    (analizar_oracion_dcg(Lista, Estructura) ->
-        write('Estructura sintactica: '), writeln(Estructura)
-    ;
-        writeln('No se pudo analizar la oracion')
+expandir_contracciones_es([], []).
+expandir_contracciones_es([al|R], [a, el|RE]) :- !, expandir_contracciones_es(R, RE).
+expandir_contracciones_es([P|R], [P|RE]) :- expandir_contracciones_es(R, RE).
+
+expandir_contracciones([], []).
+expandir_contracciones(['i\'m'|R], [i, am|RE]) :- !, expandir_contracciones(R, RE).
+expandir_contracciones([P|R], [P|RE]) :- expandir_contracciones(R, RE).
+
+capitalizar(Texto, TextoCap) :-
+    atom_chars(Texto, Chars),
+    (Chars = [] -> TextoCap = '' ;
+     Chars = [P|R],
+     upcase_atom(P, PU),
+     atom_chars(TextoCap, [PU|R])).
+
+% Función mejorada para agregar puntuación que preserve los signos originales
+agregar_puntuacion_final(Texto, TextoConPunto) :-
+    % Si el texto original ya tenía puntuación, mantenerla
+    (sub_atom(Texto, _, 1, 0, '?') -> TextoConPunto = Texto;
+     sub_atom(Texto, _, 1, 0, '!') -> TextoConPunto = Texto;
+     sub_atom(Texto, _, 1, 0, '.') -> TextoConPunto = Texto;
+     % Si no tenía puntuación, agregar punto
+     atom_concat(Texto, '.', TextoConPunto)
     ).
 
-% Descompone una oracion en sintagma nominal y verbal
-descomponer_oracion(Oracion, SN, SV) :-
-    oracion_a_lista(Oracion, Lista),
-    analizar_oracion_dcg(Lista, oracion(SNest, SVest)),
-    generar_sn(SNest, SN),
-    generar_sv(SVest, SV).
+% ======================================================================
+% FIN
+% ======================================================================

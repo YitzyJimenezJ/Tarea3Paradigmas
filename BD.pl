@@ -1,542 +1,334 @@
-% BD.pl - Base de Datos de Palabras
-% Base de datos de traduccion espanol-ingles
-% Estructura: palabra(Espanol, Ingles, Categoria)
+% ======================================================================
+% BD.pl - Base de Datos de Vocabulario Bilingue (Espanol-Ingles)
+% Sistema Experto de Traduccion - TransLog
+% ======================================================================
 
-% ========== ARTICULOS ==========
-palabra(el, the, articulo).
-palabra(la, the, articulo).
-palabra(los, the, articulo).
-palabra(las, the, articulo).
-palabra(un, a, articulo).
-palabra(una, a, articulo).
-palabra(unos, some, articulo).
-palabra(unas, some, articulo).
+% ----------------------------------------------------------------------
+% SUSTANTIVOS (Nouns)
+% Formato: sustantivo(Espanol, Ingles, Genero, Numero)
+% ----------------------------------------------------------------------
 
-% ========== PRONOMBRES ==========
-palabra(yo, i, pronombre).
-palabra(tu, you, pronombre).
-palabra(usted, you, pronombre).
-palabra(el, he, pronombre).
-palabra(ella, she, pronombre).
-palabra(nosotros, we, pronombre).
-palabra(nosotras, we, pronombre).
-palabra(ustedes, you, pronombre).
-palabra(ellos, they, pronombre).
-palabra(ellas, they, pronombre).
-palabra(eso, that, pronombre).
-palabra(esto, this, pronombre).
+:- discontiguous verbo/5.
+:- discontiguous adverbio/2.
+:- discontiguous expresion/2.
+:- discontiguous pronombre/4.
 
-% ========== SUSTANTIVOS COMUNES ==========
-palabra(hola, hello, sustantivo).
-palabra(casa, house, sustantivo).
-palabra(perro, dog, sustantivo).
-palabra(gato, cat, sustantivo).
-palabra(libro, book, sustantivo).
-palabra(libros, books, sustantivo).
-palabra(mesa, table, sustantivo).
-palabra(silla, chair, sustantivo).
-palabra(computadora, computer, sustantivo).
-palabra(computadoras, computers, sustantivo).
-palabra(telefono, phone, sustantivo).
-palabra(coche, car, sustantivo).
-palabra(agua, water, sustantivo).
-palabra(comida, food, sustantivo).
-palabra(tiempo, time, sustantivo).
-palabra(dia, day, sustantivo).
-palabra(dias, days, sustantivo).
-palabra(noche, night, sustantivo).
-palabra(persona, person, sustantivo).
-palabra(personas, people, sustantivo).
-palabra(hombre, man, sustantivo).
-palabra(mujer, woman, sustantivo).
-palabra(nino, child, sustantivo).
-palabra(ninos, children, sustantivo).
-palabra(amigo, friend, sustantivo).
-palabra(amigos, friends, sustantivo).
-palabra(familia, family, sustantivo).
-palabra(trabajo, work, sustantivo).
-palabra(escuela, school, sustantivo).
-palabra(universidad, university, sustantivo).
-palabra(ciudad, city, sustantivo).
-palabra(pais, country, sustantivo).
-palabra(paises, countries, sustantivo).
-palabra(mundo, world, sustantivo).
-palabra(ano, year, sustantivo).
-palabra(anos, years, sustantivo).
-palabra(nombre, name, sustantivo).
-palabra(parte, part, sustantivo).
-palabra(lugar, place, sustantivo).
-palabra(caso, case, sustantivo).
-palabra(grupo, group, sustantivo).
-palabra(problema, problem, sustantivo).
-palabra(mano, hand, sustantivo).
+sustantivo(hombre, man, masculino, singular).
+sustantivo(mujer, woman, femenino, singular).
+sustantivo(nino, boy, masculino, singular).
+sustantivo(nina, girl, femenino, singular).
+sustantivo(perro, dog, masculino, singular).
+sustantivo(gato, cat, masculino, singular).
+sustantivo(libro, book, masculino, singular).
+sustantivo(casa, house, femenino, singular).
+sustantivo(carro, car, masculino, singular).
+sustantivo(ano, year, masculino, singular).
+sustantivo(anos, years, masculino, plural).
+sustantivo(dia, day, masculino, singular).
+sustantivo(lenguaje, language, masculino, singular).
+sustantivo(lenguajes, languages, masculino, plural).
+sustantivo(programacion, programming, femenino, singular).
+sustantivo(inteligencia, intelligence, femenino, singular).
+sustantivo(sistema, system, masculino, singular).
+sustantivo(sistemas, systems, masculino, plural).
+sustantivo(teorema, theorem, masculino, singular).
+sustantivo(teoremas, theorems, masculino, plural).
+sustantivo(patron, pattern, masculino, singular).
+sustantivo(patrones, patterns, masculino, plural).
+sustantivo(arbol, tree, masculino, singular).
+sustantivo(arboles, trees, masculino, plural).
+sustantivo(analisis, analysis, masculino, singular).
+sustantivo(procesamiento, processing, masculino, singular).
+sustantivo(computadora, computer, femenino, singular).
+sustantivo(linguistica, linguistics, femenino, singular).
+sustantivo(comparacion, matching, femenino, singular).
+sustantivo(demostracion, proving, femenino, singular).
+sustantivo(prolog, prolog, masculino, singular).
+sustantivo(uno, one, masculino, singular).
+sustantivo(una, one, femenino, singular).
+sustantivo(parque, park, masculino, singular).
 
-% ========== SUSTANTIVOS TECNICOS (PROLOG/IA) ==========
-palabra(prolog, prolog, sustantivo).
-palabra(lenguaje, language, sustantivo).
-palabra(lenguajes, languages, sustantivo).
-palabra(programacion, programming, sustantivo).
-palabra(programador, programmer, sustantivo).
-palabra(programa, program, sustantivo).
-palabra(inteligencia, intelligence, sustantivo).
-palabra(artificial, artificial, adjetivo).
-palabra(sistema, system, sustantivo).
-palabra(sistemas, systems, sustantivo).
-palabra(experto, expert, sustantivo).
-palabra(expertos, experts, sustantivo).
-palabra(teorema, theorem, sustantivo).
-palabra(teoremas, theorems, sustantivo).
-palabra(demostracion, proving, sustantivo).
-palabra(prueba, proof, sustantivo).
-palabra(patron, pattern, sustantivo).
-palabra(patrones, patterns, sustantivo).
-palabra(comparacion, matching, sustantivo).
-palabra(coincidencia, matching, sustantivo).
-palabra(arbol, tree, sustantivo).
-palabra(arboles, trees, sustantivo).
-palabra(analisis, parse, sustantivo).
-palabra(procesamiento, processing, sustantivo).
-palabra(natural, natural, adjetivo).
-palabra(linguistica, linguistics, sustantivo).
-palabra(computacional, computational, adjetivo).
-palabra(codigo, code, sustantivo).
-palabra(datos, data, sustantivo).
-palabra(informacion, information, sustantivo).
-palabra(tecnologia, technology, sustantivo).
-palabra(algoritmo, algorithm, sustantivo).
-palabra(variable, variable, sustantivo).
-palabra(funcion, function, sustantivo).
-palabra(metodo, method, sustantivo).
-palabra(clase, class, sustantivo).
-palabra(objeto, object, sustantivo).
+% Verbos adicionales
+verbo(corre, runs, correr, tercera, singular).
+verbo(corren, run, correr, tercera, plural).
+verbo(voy, go, ir, primera, singular).
+verbo(vas, go, ir, segunda, singular).
+verbo(va, goes, ir, tercera, singular).
+verbo(vamos, go, ir, primera, plural).
+verbo(van, go, ir, tercera, plural).
 
-% ========== VERBOS (PRESENTE) ==========
-% Verbo SER
-palabra(soy, am, verbo).
-palabra(eres, are, verbo).
-palabra(es, is, verbo).
-palabra(somos, are, verbo).
-palabra(son, are, verbo).
+% Adverbios de negacion
+adverbio(no, not).
 
-% Verbo ESTAR
-palabra(estoy, am, verbo).
-palabra(estas, are, verbo).
-palabra(esta, is, verbo).
-palabra(estamos, are, verbo).
-palabra(estan, are, verbo).
+% ----------------------------------------------------------------------
+% PRONOMBRES (Pronouns)
+% Formato: pronombre(Espanol, Ingles, Persona, Numero)
+% ----------------------------------------------------------------------
+pronombre(yo, i, primera, singular).
+pronombre(tu, you, segunda, singular).
+pronombre(usted, you, segunda, singular).
+pronombre(el, he, tercera, singular). 
+pronombre(ella, she, tercera, singular).
+pronombre(nosotros, we, primera, plural).
+pronombre(ustedes, you, segunda, plural).
+pronombre(ellos, they, tercera, plural).
+pronombre(ellas, they, tercera, plural).
+
+% ----------------------------------------------------------------------
+% VERBOS (Verbs) - Presente Simple
+% Formato: verbo(Espanol, Ingles, Tipo, Persona, Numero)
+% ----------------------------------------------------------------------
+% Verbo SER/ESTAR
+verbo(soy, am, ser, primera, singular).
+verbo(eres, are, ser, segunda, singular).
+verbo(es, is, ser, tercera, singular).
+verbo(somos, are, ser, primera, plural).
+verbo(son, are, ser, tercera, plural).
 
 % Verbo TENER
-palabra(tengo, have, verbo).
-palabra(tienes, have, verbo).
-palabra(tiene, has, verbo).
-palabra(tenemos, have, verbo).
-palabra(tienen, have, verbo).
+verbo(tengo, have, tener, primera, singular).
+verbo(tienes, have, tener, segunda, singular).
+verbo(tiene, has, tener, tercera, singular).
+verbo(tenemos, have, tener, primera, plural).
+verbo(tienen, have, tener, tercera, plural).
 
-% Verbo HACER
-palabra(hago, do, verbo).
-palabra(haces, do, verbo).
-palabra(hace, does, verbo).
-palabra(hacemos, do, verbo).
-palabra(hacen, do, verbo).
+% Verbo ESTAR (location/state)
+verbo(estoy, am, estar, primera, singular).
+verbo(estas, are, estar, segunda, singular).
+verbo(esta, is, estar, tercera, singular).
+verbo(estamos, are, estar, primera, plural).
+verbo(estan, are, estar, tercera, plural).
 
-% Verbo IR
-palabra(voy, go, verbo).
-palabra(vas, go, verbo).
-palabra(va, goes, verbo).
-palabra(vamos, go, verbo).
-palabra(van, go, verbo).
+% Otros verbos comunes
+verbo(hablo, speak, hablar, primera, singular).
+verbo(hablas, speak, hablar, segunda, singular).
+verbo(habla, speaks, hablar, tercera, singular).
+verbo(hablamos, speak, hablar, primera, plural).
+verbo(hablan, speak, hablar, tercera, plural).
 
-% Verbo COMER
-palabra(como, eat, verbo).
-palabra(comes, eat, verbo).
-palabra(come, eats, verbo).
-palabra(comemos, eat, verbo).
-palabra(comen, eat, verbo).
+verbo(como, eat, comer, primera, singular).
+verbo(comes, eat, comer, segunda, singular).
+verbo(come, eats, comer, tercera, singular).
+verbo(comemos, eat, comer, primera, plural).
+verbo(comen, eat, comer, tercera, plural).
 
-% Verbo VER
-palabra(veo, see, verbo).
-palabra(ves, see, verbo).
-palabra(ve, sees, verbo).
-palabra(vemos, see, verbo).
-palabra(ven, see, verbo).
+verbo(vivo, live, vivir, primera, singular).
+verbo(vives, live, vivir, segunda, singular).
+verbo(vive, lives, vivir, tercera, singular).
+verbo(vivimos, live, vivir, primera, plural).
+verbo(viven, live, vivir, tercera, plural).
 
-% Verbo DECIR
-palabra(digo, say, verbo).
-palabra(dices, say, verbo).
-palabra(dice, says, verbo).
-palabra(decimos, say, verbo).
-palabra(dicen, say, verbo).
+verbo(juega, plays, jugar, tercera, singular).
+verbo(juegan, play, jugar, tercera, plural).
 
-% Verbo PODER
-palabra(puedo, can, verbo).
-palabra(puedes, can, verbo).
-palabra(puede, can, verbo).
-palabra(podemos, can, verbo).
-palabra(pueden, can, verbo).
+verbo(utiliza, uses, utilizar, tercera, singular).
+verbo(utilizan, use, utilizar, tercera, plural).
 
-% Verbo QUERER
-palabra(quiero, want, verbo).
-palabra(quieres, want, verbo).
-palabra(quiere, wants, verbo).
-palabra(queremos, want, verbo).
-palabra(quieren, want, verbo).
+verbo(permanece, remains, permanecer, tercera, singular).
+verbo(permanecen, remain, permanecer, tercera, plural).
 
-% Verbo DAR
-palabra(doy, give, verbo).
-palabra(das, give, verbo).
-palabra(da, gives, verbo).
-palabra(damos, give, verbo).
-palabra(dan, give, verbo).
+verbo(sigue, continues, seguir, tercera, singular).
+verbo(siguen, continue, seguir, tercera, plural).
+verbo(asociado, associated, asociar, participio, singular).
+verbo(asociada, associated, asociar, participio, singular).
+verbo(asociados, associated, asociar, participio, plural).
+verbo(siendo, being, ser, gerundio, singular).
+verbo(utiliza, used, utilizar, participio, singular).
+verbo(utilizan, used, utilizar, participio, plural).
 
-% Verbo SABER
-palabra(se, know, verbo).
-palabra(sabes, know, verbo).
-palabra(sabe, knows, verbo).
-palabra(sabemos, know, verbo).
-palabra(saben, know, verbo).
+% ----------------------------------------------------------------------
+% ADJETIVOS (Adjectives)
+% Formato: adjetivo(Espanol, Ingles)
+% ----------------------------------------------------------------------
+adjetivo(grande, big).
+adjetivo(pequeno, small).
+adjetivo(bueno, good).
+adjetivo(malo, bad).
+adjetivo(feliz, happy).
+adjetivo(triste, sad).
+adjetivo(rapido, fast).
+adjetivo(lento, slow).
+adjetivo(viejo, old).
+adjetivo(joven, young).
+adjetivo(nuevo, new).
+adjetivo(popular, popular).
+adjetivo(primero, first).
+adjetivo(primeros, first).
+adjetivo(logico, logic).
+adjetivo(logica, logic).
+adjetivo(computacional, computational).
+adjetivo(artificial, artificial).
+adjetivo(natural, natural).
+adjetivo(experto, expert).
+adjetivo(expertos, expert).
+adjetivo(pequeno, small).
+adjetivo(pequena, small).
+adjetivo(bien, fine).
+adjetivo(fino, fine).
 
-% Verbo LLEGAR
-palabra(llego, arrive, verbo).
-palabra(llegas, arrive, verbo).
-palabra(llega, arrives, verbo).
-palabra(llegamos, arrive, verbo).
-palabra(llegan, arrive, verbo).
+% ----------------------------------------------------------------------
+% ARTICULOS (Articles)
+% Formato: articulo(Espanol, Ingles, Genero, Numero)
+% ----------------------------------------------------------------------
+articulo(el, the, masculino, singular).
+articulo(la, the, femenino, singular).
+articulo(los, the, masculino, plural).
+articulo(las, the, femenino, plural).
+articulo(un, a, masculino, singular).
+articulo(una, a, femenino, singular).
+articulo(unos, some, masculino, plural).
+articulo(unas, some, femenino, plural).
 
-% Verbo LLEVAR
-palabra(llevo, carry, verbo).
-palabra(llevas, carry, verbo).
-palabra(lleva, carries, verbo).
-palabra(llevamos, carry, verbo).
-palabra(llevan, carry, verbo).
+% ----------------------------------------------------------------------
+% PREPOSICIONES (Prepositions)
+% Formato: preposicion(Espanol, Ingles)
+% ----------------------------------------------------------------------
+preposicion(en, in).
+preposicion(con, with).
+preposicion(de, of).
+preposicion(a, to).
+preposicion(por, by).
+preposicion(para, for).
+preposicion(sobre, about).
+preposicion(desde, from).
+preposicion(durante, during).
+preposicion(sin, without).
 
-% Verbo SEGUIR
-palabra(sigo, follow, verbo).
-palabra(sigues, follow, verbo).
-palabra(sigue, remains, verbo).
-palabra(seguimos, follow, verbo).
-palabra(siguen, follow, verbo).
+% ----------------------------------------------------------------------
+% CONJUNCIONES (Conjunctions)
+% Formato: conjuncion(Espanol, Ingles)
+% ----------------------------------------------------------------------
+conjuncion(y, and).
+conjuncion(o, or).
+conjuncion(pero, but).
+conjuncion(porque, because).
+conjuncion(si, if).
+conjuncion(que, that).
+conjuncion(como, as).
+conjuncion(cuando, when).
 
-% Verbo UTILIZAR/USAR
-palabra(utilizo, use, verbo).
-palabra(utilizas, use, verbo).
-palabra(utiliza, uses, verbo).
-palabra(utilizamos, use, verbo).
-palabra(utilizan, use, verbo).
-palabra(uso, use, verbo).
-palabra(usas, use, verbo).
-palabra(usa, uses, verbo).
-palabra(usamos, use, verbo).
-palabra(usan, use, verbo).
+% ----------------------------------------------------------------------
+% ADVERBIOS (Adverbs)
+% Formato: adverbio(Espanol, Ingles)
+% ----------------------------------------------------------------------
+adverbio(muy, very).
+adverbio(bien, well).
+adverbio(mal, badly).
+adverbio(aqui, here).
+adverbio(alli, there).
+adverbio(ahora, now).
+adverbio(entonces, then).
+adverbio(siempre, always).
+adverbio(nunca, never).
+adverbio(hoy, today).
+adverbio(manana, tomorrow).
+adverbio(ayer, yesterday).
+adverbio(comunmente, commonly).
+adverbio(no, not).
 
-% Verbo ASOCIAR
-palabra(asocio, associate, verbo).
-palabra(asocias, associate, verbo).
-palabra(asocia, associates, verbo).
-palabra(asociamos, associate, verbo).
-palabra(asocian, associate, verbo).
+% ----------------------------------------------------------------------
+% INTERROGATIVOS (Question Words)
+% Formato: interrogativo(Espanol, Ingles)
+% ----------------------------------------------------------------------
+interrogativo(que, what).
+interrogativo(quien, who).
+interrogativo(donde, where).
+interrogativo(cuando, when).
+interrogativo(por_que, why).
+interrogativo(como, how).
+interrogativo(cual, which).
+interrogativo(cuanto, how_much).
+interrogativo(cuantos, how_many).
+interrogativo(cuantas, how_many).
 
-% Verbo PERMANECER/QUEDAR
-palabra(permanezco, remain, verbo).
-palabra(permaneces, remain, verbo).
-palabra(permanece, remains, verbo).
-palabra(permanecemos, remain, verbo).
-palabra(permanecen, remain, verbo).
-palabra(quedo, remain, verbo).
-palabra(quedas, remain, verbo).
-palabra(queda, remains, verbo).
-palabra(quedamos, remain, verbo).
-palabra(quedan, remain, verbo).
+% ----------------------------------------------------------------------
+% PALABRAS ESPECIALES Y EXPRESIONES COMUNES
+% Formato: expresion(Espanol, Ingles)
+% ----------------------------------------------------------------------
+expresion(hola, hello).
+expresion('hola!', 'hello!').
+expresion(adios, goodbye).
+expresion('adios!', 'goodbye!').
+expresion(gracias, 'thank you').
+expresion('por favor', please).
+expresion('de nada', 'you are welcome').
+expresion('buenos dias', 'good morning').
+expresion('buenas tardes', 'good afternoon').
+expresion('buenas noches', 'good night').
 
-% Verbo TRABAJAR
-palabra(trabajo, work, verbo).
-palabra(trabajas, work, verbo).
-palabra(trabaja, works, verbo).
-palabra(trabajamos, work, verbo).
-palabra(trabajan, work, verbo).
+% Expresiones interrogativas completas
+expresion('como estas?', 'how are you?').
+expresion('cuantos anos tienes?', 'how old are you?').
 
-% Verbo CREAR/HACER
-palabra(creo, create, verbo).
-palabra(creas, create, verbo).
-palabra(crea, creates, verbo).
-palabra(creamos, create, verbo).
-palabra(crean, create, verbo).
+% Expresiones interrogativas completas
+expresion('como estas?', 'how are you?').
+expresion('cuantos anos tienes?', 'how old are you?').
+expresion('como se llama?', 'what is your name?').
+expresion('donde esta?', 'where is it?').
+expresion('cuando es?', 'when is it?').
+expresion('cual es?', 'which is it?').
+expresion('cuanto es?', 'how much is it?').
+expresion('cuanto cuesta?', 'how much does it cost?').
 
-% Verbo ESCRIBIR
-palabra(escribo, write, verbo).
-palabra(escribes, write, verbo).
-palabra(escribe, writes, verbo).
-palabra(escribimos, write, verbo).
-palabra(escriben, write, verbo).
+% ----------------------------------------------------------------------
+% VERBOS AUXILIARES
+% Formato: auxiliar(Espanol, Ingles, Persona, Numero)
+% ----------------------------------------------------------------------
+auxiliar(se, is, tercera, singular).
+auxiliar(se, are, tercera, plural).
 
-% Verbo LEER
-palabra(leo, read, verbo).
-palabra(lees, read, verbo).
-palabra(lee, reads, verbo).
-palabra(leemos, read, verbo).
-palabra(leen, read, verbo).
+% ----------------------------------------------------------------------
+% PREDICADOS DE BUSQUEDA Y CONVERSION
+% ----------------------------------------------------------------------
 
-% Verbo HABLAR
-palabra(hablo, speak, verbo).
-palabra(hablas, speak, verbo).
-palabra(habla, speaks, verbo).
-palabra(hablamos, speak, verbo).
-palabra(hablan, speak, verbo).
+% Convertir palabra de espanol a ingles
+traducir_palabra(Palabra, Traduccion) :-
+    (sustantivo(Palabra, Traduccion, _, _);
+     pronombre(Palabra, Traduccion, _, _);
+     verbo(Palabra, Traduccion, _, _, _);
+     adjetivo(Palabra, Traduccion);
+     articulo(Palabra, Traduccion, _, _);
+     preposicion(Palabra, Traduccion);
+     conjuncion(Palabra, Traduccion);
+     adverbio(Palabra, Traduccion);
+     interrogativo(Palabra, Traduccion);
+     expresion(Palabra, Traduccion);
+     auxiliar(Palabra, Traduccion, _, _)).
 
-% Verbo JUGAR
-palabra(juego, play, verbo).
-palabra(juegas, play, verbo).
-palabra(juega, plays, verbo).
-palabra(jugamos, play, verbo).
-palabra(juegan, play, verbo).
+% Convertir palabra de ingles a espanol
+traducir_palabra_inv(Palabra, Traduccion) :-
+    (sustantivo(Traduccion, Palabra, _, _);
+     pronombre(Traduccion, Palabra, _, _);
+     verbo(Traduccion, Palabra, _, _, _);
+     adjetivo(Traduccion, Palabra);
+     articulo(Traduccion, Palabra, _, _);
+     preposicion(Traduccion, Palabra);
+     conjuncion(Traduccion, Palabra);
+     adverbio(Traduccion, Palabra);
+     interrogativo(Traduccion, Palabra);
+     expresion(Traduccion, Palabra);
+     auxiliar(Traduccion, Palabra, _, _)).
 
-% ========== PARTICIPIOS Y FORMAS VERBALES ==========
-palabra(siendo, being, verbo).
-palabra(popular, popular, adjetivo).
-palabra(asociado, associated, verbo).
-palabra(asociada, associated, verbo).
-palabra(usado, used, verbo).
-palabra(usada, used, verbo).
-palabra(utilizado, used, verbo).
-palabra(utilizada, used, verbo).
+% Obtener categoria de una palabra
+categoria_palabra(Palabra, sustantivo) :- sustantivo(Palabra, _, _, _).
+categoria_palabra(Palabra, pronombre) :- pronombre(Palabra, _, _, _).
+categoria_palabra(Palabra, verbo) :- verbo(Palabra, _, _, _, _).
+categoria_palabra(Palabra, adjetivo) :- adjetivo(Palabra, _).
+categoria_palabra(Palabra, articulo) :- articulo(Palabra, _, _, _).
+categoria_palabra(Palabra, preposicion) :- preposicion(Palabra, _).
+categoria_palabra(Palabra, conjuncion) :- conjuncion(Palabra, _).
+categoria_palabra(Palabra, adverbio) :- adverbio(Palabra, _).
+categoria_palabra(Palabra, interrogativo) :- interrogativo(Palabra, _).
+categoria_palabra(Palabra, expresion) :- expresion(Palabra, _).
 
-% ========== ADJETIVOS ==========
-palabra(bueno, good, adjetivo).
-palabra(buena, good, adjetivo).
-palabra(malo, bad, adjetivo).
-palabra(mala, bad, adjetivo).
-palabra(grande, big, adjetivo).
-palabra(grandes, big, adjetivo).
-palabra(pequeno, small, adjetivo).
-palabra(pequena, small, adjetivo).
-palabra(nuevo, new, adjetivo).
-palabra(nueva, new, adjetivo).
-palabra(viejo, old, adjetivo).
-palabra(vieja, old, adjetivo).
-palabra(feliz, happy, adjetivo).
-palabra(triste, sad, adjetivo).
-palabra(bonito, beautiful, adjetivo).
-palabra(bonita, beautiful, adjetivo).
-palabra(feo, ugly, adjetivo).
-palabra(fea, ugly, adjetivo).
-palabra(rapido, fast, adjetivo).
-palabra(rapida, fast, adjetivo).
-palabra(lento, slow, adjetivo).
-palabra(lenta, slow, adjetivo).
-palabra(alto, tall, adjetivo).
-palabra(alta, tall, adjetivo).
-palabra(bajo, short, adjetivo).
-palabra(baja, short, adjetivo).
-palabra(caliente, hot, adjetivo).
-palabra(frio, cold, adjetivo).
-palabra(fria, cold, adjetivo).
-palabra(logico, logic, adjetivo).
-palabra(logica, logic, adjetivo).
-palabra(logicos, logic, adjetivo).
-palabra(primero, first, adjetivo).
-palabra(primera, first, adjetivo).
-palabra(primeros, first, adjetivo).
-palabra(primeras, first, adjetivo).
-palabra(ultimo, last, adjetivo).
-palabra(ultima, last, adjetivo).
-palabra(comun, common, adjetivo).
-palabra(comunes, common, adjetivo).
-palabra(importante, important, adjetivo).
-palabra(diferentes, different, adjetivo).
-palabra(diferente, different, adjetivo).
-palabra(mismo, same, adjetivo).
-palabra(misma, same, adjetivo).
-palabra(otro, other, adjetivo).
-palabra(otra, other, adjetivo).
-palabra(otros, others, adjetivo).
-palabra(otras, others, adjetivo).
 
-% ========== ADVERBIOS ==========
-palabra(hoy, today, adverbio).
-palabra(ayer, yesterday, adverbio).
-palabra(manana, tomorrow, adverbio).
-palabra(ahora, now, adverbio).
-palabra(aqui, here, adverbio).
-palabra(alli, there, adverbio).
-palabra(alla, there, adverbio).
-palabra(siempre, always, adverbio).
-palabra(nunca, never, adverbio).
-palabra(bien, well, adverbio).
-palabra(mal, badly, adverbio).
-palabra(muy, very, adverbio).
-palabra(mucho, much, adverbio).
-palabra(mucha, much, adverbio).
-palabra(poco, little, adverbio).
-palabra(poca, little, adverbio).
-palabra(mas, more, adverbio).
-palabra(menos, less, adverbio).
-palabra(tambien, also, adverbio).
-palabra(tampoco, neither, adverbio).
-palabra(solo, only, adverbio).
-palabra(solamente, only, adverbio).
-palabra(comunmente, commonly, adverbio).
-palabra(generalmente, generally, adverbio).
-palabra(normalmente, normally, adverbio).
-palabra(realmente, really, adverbio).
-palabra(actualmente, currently, adverbio).
+% Expresiones de continuidad
+expresion('no entendi', 'i did not understand').
+expresion('repite', 'repeat').
+expresion('repitelo', 'repeat it').
+expresion('otra vez', 'again').
+expresion('que dijiste', 'what did you say').
 
-% ========== PREPOSICIONES ==========
-palabra(en, in, preposicion).
-palabra(de, of, preposicion).
-palabra(a, to, preposicion).
-palabra(con, with, preposicion).
-palabra(sin, without, preposicion).
-palabra(por, for, preposicion).
-palabra(para, for, preposicion).
-palabra(sobre, about, preposicion).
-palabra(bajo, under, preposicion).
-palabra(entre, between, preposicion).
-palabra(desde, from, preposicion).
-palabra(hasta, until, preposicion).
-palabra(durante, during, preposicion).
-palabra(contra, against, preposicion).
-palabra(segun, according, preposicion).
-
-% ========== CONJUNCIONES ==========
-palabra(y, and, conjuncion).
-palabra(e, and, conjuncion).
-palabra(o, or, conjuncion).
-palabra(u, or, conjuncion).
-palabra(pero, but, conjuncion).
-palabra(porque, because, conjuncion).
-palabra(cuando, when, conjuncion).
-palabra(aunque, although, conjuncion).
-palabra(mientras, while, conjuncion).
-
-% ========== INTERROGATIVOS ==========
-palabra(que, what, interrogativo).
-palabra(quien, who, interrogativo).
-palabra(quienes, who, interrogativo).
-palabra(donde, where, interrogativo).
-palabra(cuando, when, interrogativo).
-palabra(cuanto, how, interrogativo).
-palabra(cuanta, how, interrogativo).
-palabra(cuantos, how, interrogativo).
-palabra(cuantas, how, interrogativo).
-palabra(cual, which, interrogativo).
-palabra(cuales, which, interrogativo).
-palabra(por_que, why, interrogativo).
-
-% ========== PALABRAS ESPECIALES (contexto dependiente) ==========
-% COMO - puede ser verbo o interrogativo
-palabra(como, eat, verbo).      % yo como (I eat)
-palabra(como, how, interrogativo).  % como estas (how are you)
-palabra(como, as, conjuncion).      % como te dije (as I told you)
-
-% QUE - puede ser pronombre relativo o interrogativo
-palabra(que, that, pronombre_relativo).  % el libro que lei (the book that I read)
-palabra(que, what, interrogativo).       % que quieres (what do you want)
-
-% SI - puede ser conjuncion o adverbio
-palabra(si, if, conjuncion).    % si vienes (if you come)
-palabra(si, yes, adverbio).     % si, acepto (yes, I accept)
-
-% ========== NUMERALES ==========
-palabra(uno, one, numeral).
-palabra(una, one, numeral).
-palabra(dos, two, numeral).
-palabra(tres, three, numeral).
-palabra(cuatro, four, numeral).
-palabra(cinco, five, numeral).
-palabra(seis, six, numeral).
-palabra(siete, seven, numeral).
-palabra(ocho, eight, numeral).
-palabra(nueve, nine, numeral).
-palabra(diez, ten, numeral).
-
-% ========== OTROS ==========
-palabra(no, no, adverbio).
-palabra(not, no, adverbio).
-palabra(yes, si, adverbio).
-
-% ========== PALABRAS AMBIGUAS EN INGLES ==========
-% ARE - puede ser verbo ser/estar
-palabra(eres, are, verbo).
-palabra(estas, are, verbo).
-palabra(somos, are, verbo).
-palabra(estan, are, verbo).
-palabra(son, are, verbo).
-
-% CAN - puede ser verbo poder o sustantivo lata
-palabra(puedo, can, verbo).
-palabra(puedes, can, verbo).
-palabra(puede, can, verbo).
-palabra(podemos, can, verbo).
-palabra(pueden, can, verbo).
-palabra(lata, can, sustantivo).
-
-% ========== PALABRAS ADICIONALES PARA PROLOG ==========
-palabra(continua, continues, verbo).
-palabra(sigue, continues, verbo).
-palabra(mantiene, maintains, verbo).
-palabra(conserva, remains, verbo).
-palabra(ensenanza, teaching, sustantivo).
-palabra(aprendizaje, learning, sustantivo).
-palabra(conocimiento, knowledge, sustantivo).
-palabra(razonamiento, reasoning, sustantivo).
-palabra(logico, logical, adjetivo).
-palabra(declarativo, declarative, adjetivo).
-palabra(procedural, procedural, adjetivo).
-
-% ========== PALABRAS AMBIGUAS ADICIONALES ==========
-% BAJO - puede ser preposicion, adjetivo o verbo
-palabra(bajo, under, preposicion).  % bajo la mesa (under the table)
-palabra(bajo, short, adjetivo).     % el es bajo (he is short)
-palabra(bajo, low, adjetivo).       % volumen bajo (low volume)
-
-% SOBRE - puede ser preposicion o sustantivo
-palabra(sobre, about, preposicion).  % hablar sobre algo (talk about)
-palabra(sobre, on, preposicion).     % sobre la mesa (on the table)
-palabra(sobre, envelope, sustantivo). % un sobre (an envelope)
-
-% LIBRO - sustantivo
-palabra(libro, book, sustantivo).
-palabra(libro, free, verbo).        % yo libro (I free - less common)
-
-% PARA - preposicion
-palabra(para, for, preposicion).
-palabra(para, to, preposicion).
-palabra(para, stop, verbo).         % el auto para (the car stops)
-
-% ESTE - puede ser pronombre demostrativo o punto cardinal
-palabra(este, this, pronombre).     % este libro (this book)
-palabra(este, east, sustantivo).    % el este (the east)
-
-% BIEN - adverbio o sustantivo
-palabra(bien, well, adverbio).      % muy bien (very well)
-palabra(bien, good, sustantivo).    % el bien comun (the common good)
-
-% MEDIA - puede ser sustantivo o adjetivo
-palabra(media, half, sustantivo).   % media hora (half hour)
-palabra(media, average, sustantivo). % la media (the average)
-palabra(media, stocking, sustantivo). % una media (a stocking)
-
-% BANCO - sustantivo con multiples significados
-palabra(banco, bank, sustantivo).   % banco financiero (financial bank)
-palabra(banco, bench, sustantivo).  % banco de plaza (park bench)
-
-% CAPITAL - sustantivo
-palabra(capital, capital, sustantivo). % ciudad capital o dinero
-
-% DERECHO/DERECHA - adjetivo/sustantivo
-palabra(derecho, right, sustantivo).  % el derecho (the right/law)
-palabra(derecho, straight, adjetivo). % en linea derecho (straight line)
-palabra(derecha, right, sustantivo).  % a la derecha (to the right)
-
-% IZQUIERDO/IZQUIERDA
-palabra(izquierdo, left, adjetivo).
-palabra(izquierda, left, sustantivo).
-
-% ORDEN - puede ser masculino o femenino con diferente significado
-palabra(orden, order, sustantivo).  % el orden (sequence) / la orden (command)
-
-% Regla auxiliar para buscar traduccion bidireccionalmente
-traducir_palabra(Espanol, Ingles, Cat) :- 
-    palabra(Espanol, Ingles, Cat).
-
-traducir_palabra(Ingles, Espanol, Cat) :- 
-    palabra(Espanol, Ingles, Cat).
+% ======================================================================
+% FIN DE BD.pl
+% ======================================================================
