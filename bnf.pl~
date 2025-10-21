@@ -1,34 +1,34 @@
 % ======================================================================
 % BNF.pl - Interfaz de Usuario MEJORADA con Continuidad
-% Sistema Experto de Traducción - TransLog
+% Sistema Experto de TraducciÃ³n - TransLog
 % ======================================================================
 
 :- consult('BD.pl').
 :- consult('Logic.pl').
 
 % ----------------------------------------------------------------------
-% ESTADO DE CONVERSACIÓN (para repetir última oración)
+% ESTADO DE CONVERSACIÃ“N (para repetir Ãºltima oraciÃ³n)
 % ----------------------------------------------------------------------
 :- dynamic ultima_entrada/1.
 :- dynamic ultima_traduccion/1.
 
-guardar_entrada(Entrada) :-
+guardar_entrada(Entrada) :- 
     retractall(ultima_entrada(_)),
     assert(ultima_entrada(Entrada)).
 
-guardar_traduccion(Traduccion) :-
+guardar_traduccion(Traduccion) :- 
     retractall(ultima_traduccion(_)),
     assert(ultima_traduccion(Traduccion)).
 
 % ----------------------------------------------------------------------
-% INTERFAZ TRANSLOGEI (Español -> Inglés)
+% INTERFAZ TRANSLOGEI (EspaÃ±ol -> InglÃ©s)
 % ----------------------------------------------------------------------
 
 translogei :-
     writeln('=============================================='),
-    writeln('    TransLogEI - Traductor Español a Inglés'),
+    writeln('    TransLogEI - Traductor EspaÃ±ol a InglÃ©s'),
     writeln('=============================================='),
-    writeln('Escriba oraciones en español para traducir.'),
+    writeln('Escriba oraciones en espaÃ±ol para traducir.'),
     writeln('Para salir, escriba: salir'),
     writeln('=============================================='),
     nl,
@@ -39,7 +39,7 @@ ciclo_translogei :-
     read_line_to_string(user_input, Input),
     atom_string(InputAtom, Input),
     (InputAtom == salir ->
-        writeln('¡Hasta luego!')
+        writeln('Â¡Hasta luego!')
     ;
         procesar_entrada_es_en(InputAtom),
         nl,
@@ -48,21 +48,21 @@ ciclo_translogei :-
 
 procesar_entrada_es_en(Entrada) :-
     downcase_atom(Entrada, EntradaLower),
-
+    
     % Verificar comandos especiales de continuidad
-    (manejar_continuidad_es(EntradaLower) ->
+    (manejar_continuidad_es(EntradaLower) -> 
         true
     ;
         % Guardar entrada actual
         guardar_entrada(Entrada),
-
+        
         % Verificar expresiones comunes
         (expresion(EntradaLower, Traduccion) ->
             capitalizar(Traduccion, TraduccionCapital),
             format('TransLogEI: ~w~n', [TraduccionCapital]),
             guardar_traduccion(TraduccionCapital)
         ;
-            % Intentar traducción
+            % Intentar traducciÃ³n
             (traducir_espanol_ingles(Entrada, Traduccion) ->
                 format('TransLogEI: ~w~n', [Traduccion]),
                 guardar_traduccion(Traduccion)
@@ -80,7 +80,7 @@ manejar_continuidad_es(Entrada) :-
         (ultima_traduccion(Trad) ->
             format('TransLogEI: ~w~n', [Trad])
         ;
-            writeln('TransLogEI: No hay traducción previa que repetir.')
+            writeln('TransLogEI: No hay traducciÃ³n previa que repetir.')
         )
     ; fail
     ).
@@ -88,22 +88,22 @@ manejar_continuidad_es(Entrada) :-
 % Respuestas conversacionales cuando no entiende
 respuesta_no_entiendo_es :-
     random_member(Respuesta, [
-        'TransLogEI: No entendí esa oración. ¿Podrías reformularla?',
-        'TransLogEI: Disculpa, no pude traducir eso. ¿Me lo repites de otra forma?',
-        'TransLogEI: No reconozco esa estructura. Intenta con oraciones más simples.',
+        'TransLogEI: No entendÃ­ esa oraciÃ³n. Â¿PodrÃ­as reformularla?',
+        'TransLogEI: Disculpa, no pude traducir eso. Â¿Me lo repites de otra forma?',
+        'TransLogEI: No reconozco esa estructura. Intenta con oraciones mÃ¡s simples.',
         'TransLogEI: Sorry, I could not understand that sentence. Could you rephrase it?'
     ]),
     writeln(Respuesta).
 
 % ----------------------------------------------------------------------
-% INTERFAZ TRANSLOGIE (Inglés -> Español)
+% INTERFAZ TRANSLOGIE (InglÃ©s -> EspaÃ±ol)
 % ----------------------------------------------------------------------
 
 translogie :-
     writeln('=============================================='),
-    writeln('    TransLogIE - Traductor Inglés a Español'),
+    writeln('    TransLogIE - Traductor InglÃ©s a EspaÃ±ol'),
     writeln('=============================================='),
-    writeln('Escriba oraciones en inglés para traducir.'),
+    writeln('Escriba oraciones en inglÃ©s para traducir.'),
     writeln('Para salir, escriba: exit'),
     writeln('=============================================='),
     nl,
@@ -123,21 +123,21 @@ ciclo_translogie :-
 
 procesar_entrada_en_es(Entrada) :-
     downcase_atom(Entrada, EntradaLower),
-
+    
     % Verificar comandos especiales de continuidad
-    (manejar_continuidad_en(EntradaLower) ->
+    (manejar_continuidad_en(EntradaLower) -> 
         true
     ;
         % Guardar entrada actual
         guardar_entrada(Entrada),
-
+        
         % Verificar expresiones comunes
         (expresion(Traduccion, EntradaLower) ->
             capitalizar(Traduccion, TraduccionCapital),
             format('TransLogIE: ~w~n', [TraduccionCapital]),
             guardar_traduccion(TraduccionCapital)
         ;
-            % Intentar traducción
+            % Intentar traducciÃ³n
             (traducir_ingles_espanol(Entrada, Traduccion) ->
                 format('TransLogIE: ~w~n', [Traduccion]),
                 guardar_traduccion(Traduccion)
@@ -149,7 +149,7 @@ procesar_entrada_en_es(Entrada) :-
         )
     ).
 
-% Manejar comandos de continuidad en inglés
+% Manejar comandos de continuidad en inglÃ©s
 manejar_continuidad_en(Entrada) :-
     (member(Entrada, [repeat, 'say it again', 'one more time', 'i did not understand', 'what did you say']) ->
         (ultima_traduccion(Trad) ->
@@ -160,29 +160,29 @@ manejar_continuidad_en(Entrada) :-
     ; fail
     ).
 
-% Respuestas conversacionales cuando no entiende (inglés)
+% Respuestas conversacionales cuando no entiende (inglÃ©s)
 respuesta_no_entiendo_en :-
     random_member(Respuesta, [
         'TransLogIE: I did not understand that sentence. Could you rephrase it?',
         'TransLogIE: Sorry, I could not translate that. Could you say it differently?',
         'TransLogIE: I do not recognize that structure. Try simpler sentences.',
-        'TransLogIE: Disculpa, no pude entender esa oración. ¿Podrías reformularla?'
+        'TransLogIE: Disculpa, no pude entender esa oraciÃ³n. Â¿PodrÃ­as reformularla?'
     ]),
     writeln(Respuesta).
 
 % ----------------------------------------------------------------------
-% INTERFAZ TRANSLOG (Detección automática)
+% INTERFAZ TRANSLOG (DetecciÃ³n automÃ¡tica)
 % ----------------------------------------------------------------------
 
 translog :-
     writeln('=============================================='),
-    writeln('         TransLog - Traductor Bilingüe'),
+    writeln('         TransLog - Traductor BilingÃ¼e'),
     writeln('=============================================='),
-    writeln('Escriba oraciones en español o inglés.'),
-    writeln('El sistema detectará el idioma automáticamente.'),
+    writeln('Escriba oraciones en espaÃ±ol o inglÃ©s.'),
+    writeln('El sistema detectarÃ¡ el idioma automÃ¡ticamente.'),
     writeln(''),
     writeln('Comandos especiales:'),
-    writeln('  - "repite" / "repeat": repetir última traducción'),
+    writeln('  - "repite" / "repeat": repetir Ãºltima traducciÃ³n'),
     writeln('  - "salir" / "exit": salir del programa'),
     writeln('=============================================='),
     nl,
@@ -193,7 +193,7 @@ ciclo_translog :-
     read_line_to_string(user_input, Input),
     atom_string(InputAtom, Input),
     ((InputAtom == salir ; InputAtom == exit) ->
-        writeln('¡Hasta luego! / Goodbye!')
+        writeln('Â¡Hasta luego! / Goodbye!')
     ;
         procesar_entrada_auto(InputAtom),
         nl,
@@ -202,9 +202,9 @@ ciclo_translog :-
 
 procesar_entrada_auto(Entrada) :-
     downcase_atom(Entrada, EntradaLower),
-
+    
     % Verificar comandos de continuidad
-    (manejar_continuidad_auto(EntradaLower) ->
+    (manejar_continuidad_auto(EntradaLower) -> 
         true
     ;
         % Detectar idioma y procesar
@@ -215,13 +215,13 @@ procesar_entrada_auto(Entrada) :-
         )
     ).
 
-% Manejar continuidad en modo automático
+% Manejar continuidad en modo automÃ¡tico
 manejar_continuidad_auto(Entrada) :-
     (member(Entrada, [repite, repitelo, repeat, 'otra vez', 'again']) ->
         (ultima_traduccion(Trad) ->
             format('TransLog: ~w~n', [Trad])
         ;
-            writeln('TransLog: No hay traducción previa. / No previous translation.')
+            writeln('TransLog: No hay traducciÃ³n previa. / No previous translation.')
         )
     ; fail
     ).
@@ -256,7 +256,7 @@ contar_palabras_idioma([P|Resto], CountES, CountEN) :-
 % ----------------------------------------------------------------------
 
 test_es_en(Texto) :-
-    writeln('--- Test Español -> Inglés ---'),
+    writeln('--- Test EspaÃ±ol -> InglÃ©s ---'),
     format('Entrada: ~w~n', [Texto]),
     (traducir_espanol_ingles(Texto, Traduccion) ->
         format('Salida:  ~w~n', [Traduccion])
@@ -265,7 +265,7 @@ test_es_en(Texto) :-
     ).
 
 test_en_es(Texto) :-
-    writeln('--- Test Inglés -> Español ---'),
+    writeln('--- Test InglÃ©s -> EspaÃ±ol ---'),
     format('Entrada: ~w~n', [Texto]),
     (traducir_ingles_espanol(Texto, Traduccion) ->
         format('Salida:  ~w~n', [Traduccion])
@@ -275,36 +275,26 @@ test_en_es(Texto) :-
 
 ejecutar_pruebas :-
     writeln('=============================================='),
-    writeln('       Batería de Pruebas - TransLog'),
+    writeln('       BaterÃ­a de Pruebas - TransLog'),
     writeln('=============================================='),
     nl,
-
+    
     test_es_en('Hola'),
     nl,
     test_es_en('El gato es grande'),
     nl,
-    test_es_en('El carro es rojo'),
+    test_es_en('Yo soy Jose'),
     nl,
-    test_es_en('Yo soy viejo'),
+    test_es_en('Voy al parque'),
     nl,
-    test_es_en('Yo no soy viejo'),
-    nl,
-    test_es_en('El esta feliz'),
-    nl,
-    test_es_en('El no esta feliz'),
-    nl,
-
+    
     test_en_es('Hello'),
     nl,
     test_en_es('The big cat'),
     nl,
-    test_en_es('I am old'),
+    test_en_es('I am a cat'),
     nl,
-    test_en_es('I am not old'),
-    nl,
-    test_en_es('The car is red'),
-    nl,
-
+    
     writeln('=============================================='),
     writeln('       Pruebas Completadas'),
     writeln('==============================================').
@@ -319,17 +309,17 @@ ayuda :-
     writeln('=============================================='),
     writeln('translogei.          - Iniciar traductor ES->EN'),
     writeln('translogie.          - Iniciar traductor EN->ES'),
-    writeln('translog.            - Traductor con detección auto'),
+    writeln('translog.            - Traductor con detecciÃ³n auto'),
     writeln(''),
-    writeln('Durante la conversación:'),
-    writeln('  repite/repeat      - Repetir última traducción'),
-    writeln('  otra vez/again     - Repetir última traducción'),
+    writeln('Durante la conversaciÃ³n:'),
+    writeln('  repite/repeat      - Repetir Ãºltima traducciÃ³n'),
+    writeln('  otra vez/again     - Repetir Ãºltima traducciÃ³n'),
     writeln('  salir/exit         - Salir del programa'),
     writeln(''),
     writeln('Testing:'),
     writeln('ejecutar_pruebas.    - Ejecutar tests'),
-    writeln('test_es_en(Texto).   - Probar traducción ES->EN'),
-    writeln('test_en_es(Texto).   - Probar traducción EN->ES'),
+    writeln('test_es_en(Texto).   - Probar traducciÃ³n ES->EN'),
+    writeln('test_en_es(Texto).   - Probar traducciÃ³n EN->ES'),
     writeln('ayuda.               - Mostrar esta ayuda'),
     writeln('==============================================').
 
