@@ -53,6 +53,14 @@ sustantivo(colores, colors, masculino, plural).
 sustantivo(edad, age, femenino, singular).
 sustantivo(nombre, name, masculino, singular).
 
+% NUEVOS - Familia
+sustantivo(hermano, brother, masculino, singular).
+sustantivo(hermana, sister, femenino, singular).
+sustantivo(madre, mother, femenino, singular).
+sustantivo(padre, father, masculino, singular).
+sustantivo(hijo, son, masculino, singular).
+sustantivo(hija, daughter, femenino, singular).
+
 % Verbos adicionales
 verbo(corre, runs, correr, tercera, singular).
 verbo(corren, run, correr, tercera, plural).
@@ -78,6 +86,13 @@ pronombre(nosotros, we, primera, plural).
 pronombre(ustedes, you, segunda, plural).
 pronombre(ellos, they, tercera, plural).
 pronombre(ellas, they, tercera, plural).
+
+% NUEVOS - Posesivos
+pronombre(mi, my, primera, singular).
+pronombre(tu, your, segunda, singular).
+pronombre(su, his, tercera, singular).
+pronombre(su, her, tercera, singular).
+pronombre(nuestro, our, primera, plural).
 
 % ----------------------------------------------------------------------
 % VERBOS (Verbs) - Presente Simple
@@ -141,6 +156,13 @@ verbo(siendo, being, ser, gerundio, singular).
 verbo(utiliza, used, utilizar, participio, singular).
 verbo(utilizan, used, utilizar, participio, plural).
 
+% Verbo LLAMARSE
+verbo(llamo, call, llamar, primera, singular).
+verbo(llamas, call, llamar, segunda, singular).
+verbo(llama, call, llamar, tercera, singular).
+verbo(llamamos, call, llamar, primera, plural).
+verbo(llaman, call, llamar, tercera, plural).
+
 % ----------------------------------------------------------------------
 % ADJETIVOS (Adjectives)
 % Formato: adjetivo(Espanol, Ingles)
@@ -172,7 +194,7 @@ adjetivo(pequena, small).
 adjetivo(bien, fine).
 adjetivo(fino, fine).
 
-% COLORES - NUEVOS
+% COLORES
 adjetivo(rojo, red).
 adjetivo(roja, red).
 adjetivo(rojos, red).
@@ -281,14 +303,14 @@ expresion('buenas tardes', 'good afternoon').
 expresion('buenas noches', 'good night').
 
 % Expresiones interrogativas completas
-expresion('como estas?', 'how are you?').
-expresion('cuantos anos tienes?', 'how old are you?').
-expresion('como se llama?', 'what is your name?').
-expresion('donde esta?', 'where is it?').
-expresion('cuando es?', 'when is it?').
-expresion('cual es?', 'which is it?').
-expresion('cuanto es?', 'how much is it?').
-expresion('cuanto cuesta?', 'how much does it cost?').
+expresion('como estas', 'how are you').
+expresion('cuantos anos tienes', 'how old are you').
+expresion('como te llamas', 'what is your name').
+expresion('donde esta', 'where is it').
+expresion('cuando es', 'when is it').
+expresion('cual es', 'which is it').
+expresion('cuanto es', 'how much is it').
+expresion('cuanto cuesta', 'how much does it cost').
 
 % Expresiones de continuidad
 expresion('no entendi', 'i did not understand').
