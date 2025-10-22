@@ -1,7 +1,23 @@
 % ======================================================================
 % BD.pl - Base de Datos de Vocabulario Bilingue (Espanol-Ingles)
 % Sistema Experto de Traduccion - TransLog
-% VERSIÓN MEJORADA CON MÁS VOCABULARIO
+% VERSIÓN MEJORADA CON SINÓNIMOS
+% ======================================================================
+%
+% SISTEMA DE SINÓNIMOS:
+% Para agregar sinónimos, simplemente añade múltiples hechos con la misma traducción:
+%
+% Ejemplo para sustantivos:
+%   sustantivo(carro, car, masculino, singular).
+%   sustantivo(auto, car, masculino, singular).
+%   sustantivo(automovil, car, masculino, singular).
+%
+% Ejemplo para adjetivos:
+%   adjetivo(grande, big).
+%   adjetivo(enorme, big).
+%   adjetivo(gigante, big).
+%
+% Prolog automáticamente encuentra cualquiera de estos sinónimos al traducir.
 % ======================================================================
 
 % ----------------------------------------------------------------------
@@ -19,10 +35,17 @@ sustantivo(mujer, woman, femenino, singular).
 sustantivo(nino, boy, masculino, singular).
 sustantivo(nina, girl, femenino, singular).
 sustantivo(perro, dog, masculino, singular).
+sustantivo(can, dog, masculino, singular).
 sustantivo(gato, cat, masculino, singular).
+sustantivo(felino, cat, masculino, singular).
 sustantivo(libro, book, masculino, singular).
+sustantivo(texto, book, masculino, singular).
 sustantivo(casa, house, femenino, singular).
+sustantivo(hogar, house, femenino, singular).
 sustantivo(carro, car, masculino, singular).
+sustantivo(auto, car, masculino, singular).
+sustantivo(automovil, car, masculino, singular).
+sustantivo(vehiculo, car, masculino, singular).
 sustantivo(ano, year, masculino, singular).
 sustantivo(anos, years, masculino, plural).
 sustantivo(dia, day, masculino, singular).
@@ -53,6 +76,14 @@ sustantivo(colores, colors, masculino, plural).
 sustantivo(edad, age, femenino, singular).
 sustantivo(nombre, name, masculino, singular).
 
+% NUEVOS - Familia
+sustantivo(hermano, brother, masculino, singular).
+sustantivo(hermana, sister, femenino, singular).
+sustantivo(madre, mother, femenino, singular).
+sustantivo(padre, father, masculino, singular).
+sustantivo(hijo, son, masculino, singular).
+sustantivo(hija, daughter, femenino, singular).
+
 % Verbos adicionales
 verbo(corre, runs, correr, tercera, singular).
 verbo(corren, run, correr, tercera, plural).
@@ -79,6 +110,13 @@ pronombre(ustedes, you, segunda, plural).
 pronombre(ellos, they, tercera, plural).
 pronombre(ellas, they, tercera, plural).
 
+% NUEVOS - Posesivos
+pronombre(mi, my, primera, singular).
+pronombre(tu, your, segunda, singular).
+pronombre(su, his, tercera, singular).
+pronombre(su, her, tercera, singular).
+pronombre(nuestro, our, primera, plural).
+
 % ----------------------------------------------------------------------
 % VERBOS (Verbs) - Presente Simple
 % Formato: verbo(Espanol, Ingles, Tipo, Persona, Numero)
@@ -104,24 +142,29 @@ verbo(esta, is, estar, tercera, singular).
 verbo(estamos, are, estar, primera, plural).
 verbo(estan, are, estar, tercera, plural).
 
-% Otros verbos comunes
+% Otros verbos comunes - Con sinónimos
 verbo(hablo, speak, hablar, primera, singular).
 verbo(hablas, speak, hablar, segunda, singular).
 verbo(habla, speaks, hablar, tercera, singular).
 verbo(hablamos, speak, hablar, primera, plural).
 verbo(hablan, speak, hablar, tercera, plural).
+verbo(converso, speak, conversar, primera, singular).
+verbo(conversa, speaks, conversar, tercera, singular).
 
 verbo(como, eat, comer, primera, singular).
 verbo(comes, eat, comer, segunda, singular).
 verbo(come, eats, comer, tercera, singular).
 verbo(comemos, eat, comer, primera, plural).
 verbo(comen, eat, comer, tercera, plural).
+verbo(devora, eats, devorar, tercera, singular).
 
 verbo(vivo, live, vivir, primera, singular).
 verbo(vives, live, vivir, segunda, singular).
 verbo(vive, lives, vivir, tercera, singular).
 verbo(vivimos, live, vivir, primera, plural).
 verbo(viven, live, vivir, tercera, plural).
+verbo(habita, lives, habitar, tercera, singular).
+verbo(reside, lives, residir, tercera, singular).
 
 verbo(juega, plays, jugar, tercera, singular).
 verbo(juegan, play, jugar, tercera, plural).
@@ -140,6 +183,13 @@ verbo(asociados, associated, asociar, participio, plural).
 verbo(siendo, being, ser, gerundio, singular).
 verbo(utiliza, used, utilizar, participio, singular).
 verbo(utilizan, used, utilizar, participio, plural).
+
+% Verbo LLAMARSE
+verbo(llamo, call, llamar, primera, singular).
+verbo(llamas, call, llamar, segunda, singular).
+verbo(llama, call, llamar, tercera, singular).
+verbo(llamamos, call, llamar, primera, plural).
+verbo(llaman, call, llamar, tercera, plural).
 
 % ----------------------------------------------------------------------
 % ADJETIVOS (Adjectives)
@@ -172,21 +222,53 @@ adjetivo(pequena, small).
 adjetivo(bien, fine).
 adjetivo(fino, fine).
 
-% COLORES - NUEVOS
+% COLORES - Con sinónimos
 adjetivo(rojo, red).
 adjetivo(roja, red).
 adjetivo(rojos, red).
 adjetivo(rojas, red).
+adjetivo(colorado, red).
+adjetivo(colorada, red).
+
 adjetivo(azul, blue).
 adjetivo(azules, blue).
+
 adjetivo(verde, green).
 adjetivo(verdes, green).
+
 adjetivo(amarillo, yellow).
 adjetivo(amarilla, yellow).
+adjetivo(amarillos, yellow).
+adjetivo(amarillas, yellow).
+
 adjetivo(negro, black).
 adjetivo(negra, black).
+adjetivo(negros, black).
+adjetivo(negras, black).
+
 adjetivo(blanco, white).
 adjetivo(blanca, white).
+adjetivo(blancos, white).
+adjetivo(blancas, white).
+
+% Más adjetivos con sinónimos
+adjetivo(grande, big).
+adjetivo(enorme, big).
+adjetivo(gigante, big).
+
+adjetivo(pequeno, small).
+adjetivo(pequena, small).
+adjetivo(chico, small).
+adjetivo(chica, small).
+adjetivo(diminuto, small).
+
+adjetivo(feliz, happy).
+adjetivo(contento, happy).
+adjetivo(alegre, happy).
+
+adjetivo(triste, sad).
+adjetivo(deprimido, sad).
+adjetivo(melancólico, sad).
 
 % ----------------------------------------------------------------------
 % ARTICULOS (Articles)
@@ -281,14 +363,14 @@ expresion('buenas tardes', 'good afternoon').
 expresion('buenas noches', 'good night').
 
 % Expresiones interrogativas completas
-expresion('como estas?', 'how are you?').
-expresion('cuantos anos tienes?', 'how old are you?').
-expresion('como se llama?', 'what is your name?').
-expresion('donde esta?', 'where is it?').
-expresion('cuando es?', 'when is it?').
-expresion('cual es?', 'which is it?').
-expresion('cuanto es?', 'how much is it?').
-expresion('cuanto cuesta?', 'how much does it cost?').
+expresion('como estas', 'how are you').
+expresion('cuantos anos tienes', 'how old are you').
+expresion('como te llamas', 'what is your name').
+expresion('donde esta', 'where is it').
+expresion('cuando es', 'when is it').
+expresion('cual es', 'which is it').
+expresion('cuanto es', 'how much is it').
+expresion('cuanto cuesta', 'how much does it cost').
 
 % Expresiones de continuidad
 expresion('no entendi', 'i did not understand').
