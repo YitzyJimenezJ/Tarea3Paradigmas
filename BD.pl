@@ -1,23 +1,6 @@
 % ======================================================================
 % BD.pl - Base de Datos de Vocabulario Bilingue (Espanol-Ingles)
-% Sistema Experto de Traduccion - TransLog
 % VERSIÓN MEJORADA CON SINÓNIMOS
-% ======================================================================
-%
-% SISTEMA DE SINÓNIMOS:
-% Para agregar sinónimos, simplemente añade múltiples hechos con la misma traducción:
-%
-% Ejemplo para sustantivos:
-%   sustantivo(carro, car, masculino, singular).
-%   sustantivo(auto, car, masculino, singular).
-%   sustantivo(automovil, car, masculino, singular).
-%
-% Ejemplo para adjetivos:
-%   adjetivo(grande, big).
-%   adjetivo(enorme, big).
-%   adjetivo(gigante, big).
-%
-% Prolog automáticamente encuentra cualquiera de estos sinónimos al traducir.
 % ======================================================================
 
 % ----------------------------------------------------------------------
@@ -430,6 +413,4 @@ categoria_palabra(Palabra, adverbio) :- adverbio(Palabra, _).
 categoria_palabra(Palabra, interrogativo) :- interrogativo(Palabra, _).
 categoria_palabra(Palabra, expresion) :- expresion(Palabra, _).
 
-% ======================================================================
-% FIN DE BD.pl
-% ======================================================================
+
