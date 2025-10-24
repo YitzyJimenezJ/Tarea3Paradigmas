@@ -413,6 +413,4 @@ categoria_palabra(Palabra, adverbio) :- adverbio(Palabra, _).
 categoria_palabra(Palabra, interrogativo) :- interrogativo(Palabra, _).
 categoria_palabra(Palabra, expresion) :- expresion(Palabra, _).
 
-% ======================================================================
-% FIN DE BD.pl
-% ======================================================================
+

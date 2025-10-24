@@ -292,6 +292,25 @@ ejecutar_pruebas :-
     nl,
     test_es_en('El no esta feliz'),
     nl,
+    test_es_en('soy azul?'),
+    nl,
+    test_es_en('Tu eres azul?'),
+    nl,
+    test_es_en('El gato es rojo?'),
+    nl,
+    test_es_en('Eres feliz?'),
+    nl,
+    writeln('--- PREGUNTAS YES/NO NEGATIVAS ---'),
+    test_es_en('no soy viejo?'),
+    nl,
+    test_es_en('Tu no eres azul?'),
+    nl,
+    test_es_en('Como estas?'),
+    nl,
+    test_es_en('Como te llamas?'),
+    nl,
+    test_es_en('Donde esta el gato?'),
+    nl,
 
     test_en_es('Hello'),
     nl,
@@ -303,6 +322,17 @@ ejecutar_pruebas :-
     nl,
     test_en_es('The car is red'),
     nl,
+    test_en_es('Am I blue?'),
+    nl,
+    test_en_es('Are you happy?'),
+    nl,
+    test_en_es('Are you not blue?'),
+    nl,
+    test_en_es('How are you?'),
+    nl,
+    test_en_es('What is your name?'),
+    nl,
+
 
     writeln('=============================================='),
     writeln('       Pruebas Completadas'),
@@ -341,6 +371,3 @@ ayuda :-
    writeln('=============================================='),
    nl.
 
-% ======================================================================
-% FIN DE BNF.pl
-% ======================================================================
